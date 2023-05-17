@@ -1,10 +1,11 @@
 from django.db import models
 from datetime import datetime
 
-class Category(models.Model):
-    name = models.CharField(verbose_name='ымя', max_length=70)
-    code_filter = models.CharField(max_length=1000)
 
+class Category(models.Model):
+    name_filter = models.CharField(max_length=70)
+    # code_filter = models.CharField(max_length=1000)
+    name = models.CharField(max_length=255)
     def __str__(self):
         return str(self.name)
 
@@ -15,7 +16,7 @@ class Filter(models.Model):
     date_add = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
-        return str(self.name) + " " + str(self.date_add)
+        return str(self.name)
 
 
 class Procesing(models.Model):
