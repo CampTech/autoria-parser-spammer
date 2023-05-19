@@ -19,4 +19,12 @@ async function parseAutoRia(url = "https://auto.ria.com/uk/auto_volvo_xc90_34163
     await browser.close();
 }
 
-parseAutoRia()
+function getJson(data) {
+    console.log(data);
+}
+
+// parseAutoRia()
+
+module.exports = {
+  getJson,
+};
