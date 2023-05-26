@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-u6^3r5d&-e=zid2_8)q2roc(9wvgp6s_cjgrt_smtqt(vv5m^k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['campfire.net.in',  '153.92.221.65', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://campfire.net.in/','http://campfire.net.in/', 'http://153.92.221.65', 'https://153.92.221.65', 'http://127.0.0.1', 'https://127.0.0.1' ]
 
 # Application definition
 
