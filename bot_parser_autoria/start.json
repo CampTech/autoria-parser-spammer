@@ -1,0 +1,12 @@
+{
+  "apps": [
+   {
+    "name": "parser",
+    "args": ["runserver", "0.0.0.0:8000"],
+    "script": "manage.py",
+    "exec_mode": "fork",
+    "exec_interpreter": "python",
+  "log_date_format" : "YYYY-MM-DD HH:mm Z"
+   }
+  ]
+ }
