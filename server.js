@@ -12,7 +12,7 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       const jsonData = JSON.parse(data);
 
-      console.log(jsonData)
+      getJson(jsonData)
 
       res.statusCode = 200;
       res.end('OK');

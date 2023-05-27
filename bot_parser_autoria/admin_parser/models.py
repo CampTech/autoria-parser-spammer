@@ -49,3 +49,6 @@ class Clients(models.Model):
 
     def __str__(self):
         return str(self.filter_data) + str(self.date_add)
+
+class Phones(models.Model):
+    phone = models.CharField(max_length=16)

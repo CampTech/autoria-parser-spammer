@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from admin_parser.views import get_marks
+from admin_parser.views import start, get_phones, phone_list
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('get-marks/', get_marks),
+    path('start/', start),
+    path('get_phones/', get_phones),
+    path('phone_list/', phone_list)
 ]
