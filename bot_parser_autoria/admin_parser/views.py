@@ -3,13 +3,16 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
-from .models import Filter, Category, Phones
+from .models import Filter, Category, Phones, Clients
 from .forms import FilterForm
 
 
-def send_link_page_to_pasrser(pages=False):
+def send_link_page_to_pasrser(category_name, pages=False):
     url = 'http://localhost:3000/data'
-    data = json.dumps(pages)
+    data = json.dumps({
+        'pages': pages,
+        'category': category_name
+    })
     headers = {'Content-Type': 'application/json'}
     print('123')
     response = requests.post(url, data=data, headers=headers)
@@ -20,12 +23,11 @@ def send_link_page_to_pasrser(pages=False):
         print('Текст ошибки:', response.text)
 
 
-def get_marks(categories, request):
-    api_key = "rDVqLHZTvd3zkmb0mnl3LquSjkO21D4RJMrpWa6q"
-    # api_key = "VLhy1HZ0olZ6Vi2rwiIk6yBSax2n6vwTw1ebwpGa"
+def get_marks(categories, request, category_name):
+    # api_key = "rDVqLHZTvd3zkmb0mnl3LquSjkO21D4RJMrpWa6q"
+    api_key = "VLhy1HZ0olZ6Vi2rwiIk6yBSax2n6vwTw1ebwpGa"
     url = "https://developers.ria.com/auto/search"
     info_url = "https://developers.ria.com/auto/info"
-    page = 0
     params = {}
 
     for category in categories:
@@ -39,15 +41,29 @@ def get_marks(categories, request):
         if response.status_code == 200:
             car_pages = []
             res = response.json()
-            for id in res['result']['search_result']['ids']:
-                car_info = requests.get(info_url, params={"api_key": api_key, "auto_id": id})
-                if car_info.status_code == 200:
-                    car_info = car_info.json()
-                    car_pages.append(car_info['linkToView'])
+            print(page)
+            print(res)
+            print('__________________')
+            # for id in res['result']['search_result']['ids']:
+            #     car_info = requests.get(info_url, params={"api_key": api_key, "auto_id": id})
+            #     if car_info.status_code == 200:
+            #         car_info = car_info.json()
+            #         car_pages.append(car_info['linkToView'])
+            #
+            # send_link_page_to_pasrser(category_name, car_pages)
 
-            send_link_page_to_pasrser(car_pages)
-            return HttpResponse("GET-запрос выполнен успешно")
-
+@csrf_exempt
+def main_page(request):
+    if request.method == 'POST':
+        data = request.body
+        print(json.loads(request.body))
+        url = 'http://localhost:3000/'
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, data=data, headers=headers)
+        if response.status_code == 200:
+            print('Данные успешно отправлены на Node.js сервер')
+        return JsonResponse({'success': ':)'}, status=200)
+    return render(request, 'filter.html')
 
 def start(request):
     if request.method == 'POST':
@@ -55,7 +71,7 @@ def start(request):
         if form.is_valid():
             selected_filter = form.cleaned_data['filter']
             categories = selected_filter.category.all()
-            get_marks(categories, request)
+            get_marks(categories, request, selected_filter.name)
     else:
         form = FilterForm()
 
@@ -69,6 +85,7 @@ def get_phones(request):
         for item in data:
             if item != 'NULL' and item:
                 print(item)
+                Clients.objects.create(phone=item, massage_interested='f')
                 Phones.objects.create(phone=item)
     return JsonResponse({'success': ':)'}, status=200)
 
