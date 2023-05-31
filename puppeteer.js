@@ -30,12 +30,9 @@ async function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/
     await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
 
     const cookie = await page.$('label.js-close.c-notifier-btn');
-    // await cookie.click();
     await page.evaluate(() => {
         window.scrollTo(0, document.body.scrollHeight);
     });
-    await page.screenshot({path: 'screenshot0.png', fullPage: true});
-
     if (data.select.length !== 0) {
         for (let select of data.select) {
             const selectElement = await page.$(select.element);
@@ -52,9 +49,6 @@ async function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/
             await label.click();
             await page.evaluate((e) => e.click(), label);
             await label.focus();
-
-            await page.screenshot({path: 'screenshot5.png', fullPage: true});
-
             await input.type(el.value, {delay: 100});
             const liElement = await input.evaluateHandle((e) => {
                 return e.parentElement.querySelector('ul li')
