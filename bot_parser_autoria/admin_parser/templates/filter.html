@@ -7955,22 +7955,22 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="span3">
-                            <div class="">
-                                <div class="m-rows">
+<!--                        <div class="span3">-->
+<!--                            <div class="">-->
+<!--                                <div class="m-rows">-->
 
-                                    <div class="m-indent">
-                                        <div id="autocomplete-model-0" class="autocomplete-search"><input type="search"
-                                                                                                          autocomplete="off"
-                                                                                                          id="autocompleteInput-model-0"
-                                                                                                          placeholder="Оберіть модель"
-                                                                                                          aria-label="Поиск"><label
-                                                for="autocompleteInput-model-0" data-text="Оберіть модель"
-                                                class="text"></label><!----></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<!--                                    <div class="m-indent">-->
+<!--                                        <div id="autocomplete-model-0" class="autocomplete-search"><input type="search"-->
+<!--                                                                                                          autocomplete="off"-->
+<!--                                                                                                          id="autocompleteInput-model-0"-->
+<!--                                                                                                          placeholder="Оберіть модель"-->
+<!--                                                                                                          aria-label="Поиск"><label-->
+<!--                                                for="autocompleteInput-model-0" data-text="Оберіть модель"-->
+<!--                                                class="text"></label>&lt;!&ndash;&ndash;&gt;</div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </div>
                     <div class="row">
                         <div class="span3">
@@ -8229,12 +8229,12 @@
                             </select><!----></div>
                         </div><!----><!----></div>
                 </div>
-                <a href="javascript:void(0);" class="link-dotted add_item">
-                    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10.5 3V16M17 9.5H4" stroke="#256799"></path>
-                    </svg>
-                    Ще марка
-                </a></div>
+<!--                <a href="javascript:void(0);" class="link-dotted add_item">-->
+<!--                    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">-->
+<!--                        <path d="M10.5 3V16M17 9.5H4" stroke="#256799"></path>-->
+<!--                    </svg>-->
+<!--                    Ще марка-->
+<!--                </a></div>-->
         </div>
         <section class="rows"><!---->
 
@@ -8379,7 +8379,7 @@
         document.querySelectorAll('input').forEach(el => {
             if (el.getAttribute('type') === 'search' && el.value !== '') {
                 const allAttributesText = 'input' + enumElements(el);
-                const label = 'label' + enumElements(el.nextSibling);
+                const label = 'label' + enumElements(el.nextElementSibling);
                 const obj = {
                     'value': el.value,
                     'element': allAttributesText,
@@ -8391,7 +8391,7 @@
             if (el.getAttribute('type') === 'radio') {
                 if (el.checked) {
                     const idAttribute = '#' + el.getAttribute('id');
-                    const label = 'label' + enumElements(el.nextSibling);
+                    const label = 'label' + enumElements(el.nextElementSibling);
                     const obj = {
                         'value': el.value,
                         'element': idAttribute,
