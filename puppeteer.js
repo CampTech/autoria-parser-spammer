@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 async function parseAutoRia(urls) {
-    const browser = await puppeteer.launch({timeout: 0});
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], timeout: 0});
     const page = await browser.newPage();
     const phones = [];
 
