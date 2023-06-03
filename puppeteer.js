@@ -6,11 +6,9 @@ async function parseAutoRia(urls) {
     const phones = [];
 
     for (let url of urls) {
-        console.log(url);
-        await page.goto(url, {waitUntil: 'networkidle0'});
+        await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
         const phoneElement = await page.$('.phone');
         if (phoneElement) {
-            const number = await page.$eval('.phone', element => element.textContent.trim());
             await phoneElement.click();
             await page.waitForTimeout(4000);
             const phoneNumber = await page.$eval('.phone', element => element.textContent.trim());
