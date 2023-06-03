@@ -1,7 +1,9 @@
 const http = require('http');
 const {getJson, parseSearch} = require('./puppeteer.js');
+const requestQueue = [];
+let isProcessing = false;
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/') {
         let data = '';
 
@@ -9,10 +11,34 @@ const server = http.createServer((req, res) => {
             data += chunk;
         });
 
-        req.on('end', () => {
+        req.on('end', async () => {
             const jsonData = JSON.parse(data);
 
-            parseSearch(jsonData);
+            await addToQueue(jsonData);
+
+            async function addToQueue(data) {
+                requestQueue.push(data);
+                if (!isProcessing) {
+                    isProcessing = true;
+                    await processQueue();
+                }
+            }
+
+            async function processQueue() {
+                if (requestQueue.length > 0) {
+                    const requestData = requestQueue.shift();
+                    try {
+                        await parseSearch(requestData).then(() => {
+                            processQueue();
+                        });
+                        console.log('Запрос выполнен:', requestData);
+                    } catch (error) {
+                        console.error('Ошибка при выполнении запроса:', error);
+                    }
+                } else {
+                    isProcessing = false;
+                }
+            }
 
             res.statusCode = 200;
             res.end('OK');
