@@ -55,7 +55,8 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                 });
                 await page.waitForTimeout(5000);
 
-                await liElement.click();
+                // await liElement.click();
+                await page.evaluate((e) => e.click(), liElement);
             }
         }
 
