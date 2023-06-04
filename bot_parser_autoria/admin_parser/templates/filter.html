@@ -6135,8 +6135,37 @@
         }
     </style>
 
+    <style>
+        .li {
+            margin-bottom: 10px;
+        }
+
+        .popup {
+            position: fixed;
+            width: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.6);
+            height: 100%;
+        }
+
+        .popup-wrapper {
+            width: 50%;
+            height: 42%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            background-color: rgba(29, 144, 216, 0.8);
+        }
+        .popup-wrapper span {
+            font-size: 33px;
+        }
+    </style>
+
 </head>
-<body>
+<body style="display: flex; flex-direction: row">
 <div class="app-content extended">
     <form class="ext-item">
         <div class="rows"><label class="label">Тип транспорту</label>
@@ -7955,22 +7984,22 @@
                                 </div>
                             </div>
                         </div>
-<!--                        <div class="span3">-->
-<!--                            <div class="">-->
-<!--                                <div class="m-rows">-->
+                        <!--                        <div class="span3">-->
+                        <!--                            <div class="">-->
+                        <!--                                <div class="m-rows">-->
 
-<!--                                    <div class="m-indent">-->
-<!--                                        <div id="autocomplete-model-0" class="autocomplete-search"><input type="search"-->
-<!--                                                                                                          autocomplete="off"-->
-<!--                                                                                                          id="autocompleteInput-model-0"-->
-<!--                                                                                                          placeholder="Оберіть модель"-->
-<!--                                                                                                          aria-label="Поиск"><label-->
-<!--                                                for="autocompleteInput-model-0" data-text="Оберіть модель"-->
-<!--                                                class="text"></label>&lt;!&ndash;&ndash;&gt;</div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <!--                                    <div class="m-indent">-->
+                        <!--                                        <div id="autocomplete-model-0" class="autocomplete-search"><input type="search"-->
+                        <!--                                                                                                          autocomplete="off"-->
+                        <!--                                                                                                          id="autocompleteInput-model-0"-->
+                        <!--                                                                                                          placeholder="Оберіть модель"-->
+                        <!--                                                                                                          aria-label="Поиск"><label-->
+                        <!--                                                for="autocompleteInput-model-0" data-text="Оберіть модель"-->
+                        <!--                                                class="text"></label>&lt;!&ndash;&ndash;&gt;</div>-->
+                        <!--                                    </div>-->
+                        <!--                                </div>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
                     </div>
                     <div class="row">
                         <div class="span3">
@@ -8229,121 +8258,144 @@
                             </select><!----></div>
                         </div><!----><!----></div>
                 </div>
-<!--                <a href="javascript:void(0);" class="link-dotted add_item">-->
-<!--                    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">-->
-<!--                        <path d="M10.5 3V16M17 9.5H4" stroke="#256799"></path>-->
-<!--                    </svg>-->
-<!--                    Ще марка-->
-<!--                </a></div>-->
-        </div>
-        <section class="rows"><!---->
+                <!--                <a href="javascript:void(0);" class="link-dotted add_item">-->
+                <!--                    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">-->
+                <!--                        <path d="M10.5 3V16M17 9.5H4" stroke="#256799"></path>-->
+                <!--                    </svg>-->
+                <!--                    Ще марка-->
+                <!--                </a></div>-->
+            </div>
+            <section class="rows"><!---->
 
-        </section>
-        <hr>
-        <section><h2 class="head boxed">Результати пошуку</h2>
-            <div class="rows"><label class="label">Сортування</label>
-                <div class="indent">
-                    <div class="radio-area m_radio_hide"><input id="order-0" type="radio" value="" name="sort[0].order"
-                                                                checked="checked"><label for="order-0"
-                                                                                         class="radio-btn">Звичайне</label><input
-                            id="order-2" type="radio" value="price.asc" name="sort[0].order"><label for="order-2"
-                                                                                                    class="radio-btn">Від
-                        дешевих до дорогих</label><input id="order-3" type="radio" value="price.desc"
-                                                         name="sort[0].order"><label for="order-3" class="radio-btn">Від
-                        дорогих до дешевих</label><input id="order-7" type="radio" value="dates.created.desc"
-                                                         name="sort[0].order"><label for="order-7" class="radio-btn">Дата
-                        додавання</label><input id="order-6" type="radio" value="year.asc" name="sort[0].order"><label
-                            for="order-6" class="radio-btn">Рік випуску, за зростанням</label><input id="order-5"
+            </section>
+            <hr>
+            <section><h2 class="head boxed">Результати пошуку</h2>
+                <div class="rows"><label class="label">Сортування</label>
+                    <div class="indent">
+                        <div class="radio-area m_radio_hide"><input id="order-0" type="radio" value=""
+                                                                    name="sort[0].order"
+                                                                    checked="checked"><label for="order-0"
+                                                                                             class="radio-btn">Звичайне</label><input
+                                id="order-2" type="radio" value="price.asc" name="sort[0].order"><label for="order-2"
+                                                                                                        class="radio-btn">Від
+                            дешевих до дорогих</label><input id="order-3" type="radio" value="price.desc"
+                                                             name="sort[0].order"><label for="order-3"
+                                                                                         class="radio-btn">Від
+                            дорогих до дешевих</label><input id="order-7" type="radio" value="dates.created.desc"
+                                                             name="sort[0].order"><label for="order-7"
+                                                                                         class="radio-btn">Дата
+                            додавання</label><input id="order-6" type="radio" value="year.asc"
+                                                    name="sort[0].order"><label
+                                for="order-6" class="radio-btn">Рік випуску, за зростанням</label><input id="order-5"
+                                                                                                         type="radio"
+                                                                                                         value="year.desc"
+                                                                                                         name="sort[0].order"><label
+                                for="order-5" class="radio-btn">Рік випуску, за спаданням</label><input id="order-13"
+                                                                                                        type="radio"
+                                                                                                        value="mileage.asc"
+                                                                                                        name="sort[0].order"><label
+                                for="order-13" class="radio-btn">Пробіг, за зростанням</label><input id="order-12"
                                                                                                      type="radio"
-                                                                                                     value="year.desc"
+                                                                                                     value="mileage.desc"
                                                                                                      name="sort[0].order"><label
-                            for="order-5" class="radio-btn">Рік випуску, за спаданням</label><input id="order-13"
-                                                                                                    type="radio"
-                                                                                                    value="mileage.asc"
-                                                                                                    name="sort[0].order"><label
-                            for="order-13" class="radio-btn">Пробіг, за зростанням</label><input id="order-12"
-                                                                                                 type="radio"
-                                                                                                 value="mileage.desc"
-                                                                                                 name="sort[0].order"><label
-                            for="order-12" class="radio-btn">Пробіг, за спаданням</label></div>
+                                for="order-12" class="radio-btn">Пробіг, за спаданням</label></div>
+                    </div>
                 </div>
-            </div>
-            <div class="rows"><label class="label">Період подачі</label>
-                <div class="indent">
-                    <div class="radio-area m_radio_hide"><input id="top-0" type="radio" value="0" name="top"
-                                                                checked="checked"><label for="top-0" class="radio-btn">Всі</label><input
-                            id="top-1" type="radio" value="1" name="top"><label for="top-1" class="radio-btn">За
-                        годину</label><input id="top-8" type="radio" value="8" name="top"><label for="top-8"
-                                                                                                 class="radio-btn">За 3
-                        години</label><input id="top-9" type="radio" value="9" name="top"><label for="top-9"
-                                                                                                 class="radio-btn">За 6
-                        годин</label><input id="top-14" type="radio" value="14" name="top"><label for="top-14"
-                                                                                                  class="radio-btn">За
-                        12 годин</label><input id="top-2" type="radio" value="2" name="top"><label for="top-2"
-                                                                                                   class="radio-btn">За
-                        сьогодні</label><input id="top-11" type="radio" value="11" name="top"><label for="top-11"
+                <div class="rows"><label class="label">Період подачі</label>
+                    <div class="indent">
+                        <div class="radio-area m_radio_hide"><input id="top-0" type="radio" value="0" name="top"
+                                                                    checked="checked"><label for="top-0"
+                                                                                             class="radio-btn">Всі</label><input
+                                id="top-1" type="radio" value="1" name="top"><label for="top-1" class="radio-btn">За
+                            годину</label><input id="top-8" type="radio" value="8" name="top"><label for="top-8"
                                                                                                      class="radio-btn">За
-                        добу</label><input id="top-10" type="radio" value="10" name="top"><label for="top-10"
-                                                                                                 class="radio-btn">За 2
-                        дні</label><input id="top-3" type="radio" value="3" name="top"><label for="top-3"
-                                                                                              class="radio-btn">За 3
-                        дні</label><input id="top-4" type="radio" value="4" name="top"><label for="top-4"
-                                                                                              class="radio-btn">За
-                        тиждень</label><input id="top-5" type="radio" value="5" name="top"><label for="top-5"
+                            3
+                            години</label><input id="top-9" type="radio" value="9" name="top"><label for="top-9"
+                                                                                                     class="radio-btn">За
+                            6
+                            годин</label><input id="top-14" type="radio" value="14" name="top"><label for="top-14"
+                                                                                                      class="radio-btn">За
+                            12 годин</label><input id="top-2" type="radio" value="2" name="top"><label for="top-2"
+                                                                                                       class="radio-btn">За
+                            сьогодні</label><input id="top-11" type="radio" value="11" name="top"><label for="top-11"
+                                                                                                         class="radio-btn">За
+                            добу</label><input id="top-10" type="radio" value="10" name="top"><label for="top-10"
+                                                                                                     class="radio-btn">За
+                            2
+                            дні</label><input id="top-3" type="radio" value="3" name="top"><label for="top-3"
+                                                                                                  class="radio-btn">За 3
+                            дні</label><input id="top-4" type="radio" value="4" name="top"><label for="top-4"
                                                                                                   class="radio-btn">За
-                        місяць</label><input id="top-6" type="radio" value="6" name="top"><label for="top-6"
-                                                                                                 class="radio-btn">За 3
-                        місяці</label></div>
+                            тиждень</label><input id="top-5" type="radio" value="5" name="top"><label for="top-5"
+                                                                                                      class="radio-btn">За
+                            місяць</label><input id="top-6" type="radio" value="6" name="top"><label for="top-6"
+                                                                                                     class="radio-btn">За
+                            3
+                            місяці</label></div>
+                    </div>
                 </div>
-            </div>
-            <div class="rows"><label class="label">Актуальність</label>
+                <div class="rows"><label class="label">Актуальність</label>
+                    <div class="indent">
+                        <div class="radio-area"><input id="saledParam-0" type="radio" value="all" name="sold"
+                                                       checked="checked"><label for="saledParam-0"
+                                                                                class="radio-btn">Всі</label><input
+                                id="saledParam-1" type="radio" value="not" name="sold"><label for="saledParam-1"
+                                                                                              class="radio-btn">Приховати
+                            продані</label><input id="saledParam-2" type="radio" value="only" name="sold"><label
+                                for="saledParam-2" class="radio-btn">Тільки продані</label></div>
+                    </div>
+                </div>
+                <div class="rows"><label class="label">Показувати</label>
+                    <div class="indent">
+                        <div class="radio-area"><input id="countpage-10" type="radio" value="10"><label
+                                for="countpage-10"
+                                class="radio-btn">По
+                            10</label><input id="countpage-20" type="radio" value="20"><label
+                                for="countpage-20" class="radio-btn">По 20</label><input id="countpage-30" type="radio"
+                                                                                         value="30"><label
+                                for="countpage-30" class="radio-btn">По 30</label><input id="countpage-50" type="radio"
+                                                                                         value="50"><label
+                                for="countpage-50" class="radio-btn">По 50</label><input id="countpage-100" type="radio"
+                                                                                         value="100"
+                                                                                         checked="checked"><label
+                                for="countpage-100" class="radio-btn">По 100</label></div>
+                    </div>
+                </div>
+            </section><!---->
+            <hr class="">
+            <div class="rows"><label class="label">Продавець</label>
                 <div class="indent">
-                    <div class="radio-area"><input id="saledParam-0" type="radio" value="all" name="sold"
-                                                   checked="checked"><label for="saledParam-0"
+                    <div class="radio-area"><input id="sellerType-0" type="radio" value="0" name="sellerType"
+                                                   checked="checked"><label for="sellerType-0"
                                                                             class="radio-btn">Всі</label><input
-                            id="saledParam-1" type="radio" value="not" name="sold"><label for="saledParam-1"
-                                                                                          class="radio-btn">Приховати
-                        продані</label><input id="saledParam-2" type="radio" value="only" name="sold"><label
-                            for="saledParam-2" class="radio-btn">Тільки продані</label></div>
+                            id="sellerType-1" type="radio" value="1" name="sellerType"><label for="sellerType-1"
+                                                                                              class="radio-btn">Приватна
+                        особа</label><input id="sellerType-2" type="radio" value="2" name="sellerType"><label
+                            for="sellerType-2" class="radio-btn">Компанія</label></div>
                 </div>
             </div>
-            <div class="rows"><label class="label">Показувати</label>
-                <div class="indent">
-                    <div class="radio-area"><input id="countpage-10" type="radio" value="10"><label for="countpage-10"
-                                                                                                    class="radio-btn">По
-                        10</label><input id="countpage-20" type="radio" value="20"><label
-                            for="countpage-20" class="radio-btn">По 20</label><input id="countpage-30" type="radio"
-                                                                                     value="30"><label
-                            for="countpage-30" class="radio-btn">По 30</label><input id="countpage-50" type="radio"
-                                                                                     value="50"><label
-                            for="countpage-50" class="radio-btn">По 50</label><input id="countpage-100" type="radio"
-                                                                                     value="100"
-                                                                                     checked="checked"><label
-                            for="countpage-100" class="radio-btn">По 100</label></div>
-                </div>
-            </div>
-        </section><!---->
-        <hr class="">
-        <div class="rows"><label class="label">Продавець</label>
-            <div class="indent">
-                <div class="radio-area"><input id="sellerType-0" type="radio" value="0" name="sellerType"
-                                               checked="checked"><label for="sellerType-0" class="radio-btn">Всі</label><input
-                        id="sellerType-1" type="radio" value="1" name="sellerType"><label for="sellerType-1"
-                                                                                          class="radio-btn">Приватна
-                    особа</label><input id="sellerType-2" type="radio" value="2" name="sellerType"><label
-                        for="sellerType-2" class="radio-btn">Компанія</label></div>
-            </div>
-        </div>
 
-        <div class="search-result fixed-shadow" style="bottom:0px;">
-            <div class="rows">
-                <div class="indent">
-                    <button type="button" class="button small"><i class="icon-search"></i> Пошук
-                    </button>
+            <div class="search-result fixed-shadow" style="bottom:0px;">
+                <div class="rows">
+                    <div class="indent">
+                        <button type="button" class="button small"><i class="icon-search"></i> Пошук
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </div><!----></form>
+            </div><!----></div>
+    </form>
     <span></span></div>
+<div style="display: none;border-left: 1px solid;margin-right: 30px;flex-direction: column;align-items: center;"
+     class="processing">
+    <ul style="margin: 50px 0;">
+    </ul>
+</div>
+
+<div class="popup">
+    <div class="popup-wrapper">
+        <span>Парсер запущен и находиться в процессе</span>
+    </div>
+</div>
 
 
 <script>
@@ -8375,7 +8427,6 @@
     }
 
     document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
-        btn_evt.preventDefault();
         document.querySelectorAll('input').forEach(el => {
             if (el.getAttribute('type') === 'search' && el.value !== '') {
                 const allAttributesText = 'input' + enumElements(el);
@@ -8423,11 +8474,22 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                location.reload();
+                data = [];
             })
             .catch(error => {
                 console.error('Ошибка:', error);
             });
+
+        const popup = document.querySelector('.popup');
+
+        popup.style.display = 'flex';
+        window.setTimeout(() => {
+            popup.style.display = 'none';
+        }, 1000);
+
+        const processing = document.querySelector('.processing');
+        processing.style.display = 'flex';
+        processing.querySelector('ul').insertAdjacentHTML('beforeend', '<li>Парсинг в процессе...</li>');
     });
 
     const input = document.querySelector('input#autocompleteInput-brand-0');
