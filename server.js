@@ -1,5 +1,5 @@
-const http = require('http');
-const {getJson, parseSearch} = require('./puppeteer.js');
+const {parseSearch} = require('./puppeteer.js');
+const {runWhatsappSpammer} = require('./emulator/appium.js');
 const requestQueue = [];
 let isProcessing = false;
 const fs = require('fs');
@@ -62,7 +62,7 @@ app.get('/processing', (req, res) => {
     res.render('processing');
 });
 
-app.post('/set_number', (req, res) => {
+app.post('/processing/add', (req, res) => {
     let data = '';
 
     req.on('data', (chunk) => {
@@ -72,18 +72,22 @@ app.post('/set_number', (req, res) => {
     req.on('end', async () => {
         await fs.readFile('./assets/numbers.json', 'utf8', (err, numbers) => {
             data = JSON.parse(data);
-            let dataArray = JSON.parse(JSON.parse(numbers));
+            let numbersArray = JSON.parse(numbers);
             data.forEach(e => {
-                dataArray.push(e);
+                numbersArray.push(e);
             });
 
-            dataArray = JSON.stringify(dataArray);
-            fs.writeFile('./assets/numbers.json', dataArray, 'utf8', (error) => {});
+            runWhatsappSpammer(numbersArray, 'Hi)');
+
+            numbers = JSON.stringify(numbersArray);
+            fs.writeFile('./assets/numbers.json', numbers, 'utf8', (error) => {});
         });
 
         res.statusCode = 200;
         res.end(JSON.stringify(true));
     })
+
+
 
 });
 

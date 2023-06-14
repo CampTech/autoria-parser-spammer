@@ -14,7 +14,7 @@ async function parseAutoRia(urls, browser) {
 
     for (let url of urls) {
         index++;
-        if (index < 3) {
+        if (index < 6) {
             await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
             const phoneElement = await page.$('.phone');
             if (phoneElement) {
@@ -98,7 +98,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
             const phoneNumbers = await parseAutoRia(hrefs, browser);
             await browser.close();
             if (phoneNumbers.length > 0) {
-                const url = 'http://127.0.0.1:3000/set_number';
+                const url = 'http://127.0.0.1:3000/processing/add';
                 const requestOptions = {
                     method: 'POST',
                     headers: {
