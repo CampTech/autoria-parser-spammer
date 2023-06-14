@@ -1,20 +1,35 @@
 const puppeteer = require('puppeteer');
 
-async function parseAutoRia(urls) {
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], timeout: 0});
+async function isValidPhoneNumber(number) {
+    const pattern = /^[\d()]+$/;
+    return pattern.test(number);
+}
+
+async function parseAutoRia(urls, browser) {
+    // const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], timeout: 0});
     const page = await browser.newPage();
     const phones = [];
 
+    let index = 0;
+
     for (let url of urls) {
-        await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
-        const phoneElement = await page.$('.phone');
-        if (phoneElement) {
-            await phoneElement.click();
-            await page.waitForTimeout(4000);
-            const phoneNumber = await page.$eval('.phone', element => element.textContent.trim());
-            if (phoneNumber !== undefined && phoneNumber !== null) {
-                console.log(phoneNumber);
-                phones.push(phoneNumber);
+        index++;
+        if (index < 3) {
+            await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
+            const phoneElement = await page.$('.phone');
+            if (phoneElement) {
+                await phoneElement.click();
+                await page.waitForTimeout(4000);
+                let phoneNumber = await page.$eval('.phone', element => element.textContent.trim());
+                phoneNumber = phoneNumber.replace(/\s/g, "");
+                if (phoneNumber !== undefined && phoneNumber !== null) {
+                    if (await isValidPhoneNumber(phoneNumber)) {
+                        console.log(phoneNumber);
+                        phones.push(phoneNumber);
+                    } else {
+                        console.log('По идеи не правильный ' + phoneNumber)
+                    }
+                }
             }
         }
     }
@@ -55,8 +70,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                 });
                 await page.waitForTimeout(5000);
 
-                // await liElement.click();
-                await page.evaluate((e) => e.click(), liElement);
+                await liElement.click();
             }
         }
 
@@ -80,11 +94,11 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
 
         if (await page.$('.item.ticket-title a')) {
             const hrefs = await page.$$eval('.item.ticket-title a', links => links.map(link => link.href));
-            await browser.close();
 
-            const phoneNumbers = await parseAutoRia(hrefs);
+            const phoneNumbers = await parseAutoRia(hrefs, browser);
+            await browser.close();
             if (phoneNumbers.length > 0) {
-                const url = 'http://127.0.0.1:8000/get_phones/';
+                const url = 'http://127.0.0.1:3000/set_number';
                 const requestOptions = {
                     method: 'POST',
                     headers: {
@@ -92,8 +106,6 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                     },
                     body: JSON.stringify(phoneNumbers),
                 };
-
-                console.log(JSON.stringify(phoneNumbers));
 
                 fetch(url, requestOptions)
                     .then(response => response.json())
