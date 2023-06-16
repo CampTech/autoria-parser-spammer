@@ -17,9 +17,6 @@ const processStatus = [
 
 const message = 'test';
 
-
-
-
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'assets')));
 
@@ -103,7 +100,10 @@ app.post('/processing/add', (req, res) => {
                     isProcessing = false;
                 } else {
                     getFileData('./assets/clients.json', (json) => {
-                        runWhatsappSpammer(JSON.parse(json), message);
+                        const data = JSON.parse(json);
+                        const filteredData = data.filter(process => process.status === 'sending');
+                        isProcessing = true;
+                        runWhatsappSpammer(filteredData, message);
                     });
                 }
             });

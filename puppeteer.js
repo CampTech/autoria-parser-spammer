@@ -15,7 +15,7 @@ async function parseAutoRia(urls, browser, filterId) {
 
     for (let url of urls) {
         index++;
-        if (index < 6) {
+        if (index < 3) {
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
             const phoneElement = await page.$('.phone');
             if (phoneElement) {
@@ -33,10 +33,20 @@ async function parseAutoRia(urls, browser, filterId) {
                             clients = JSON.parse(clients);
                             const client = {
                                 'number': phoneNumber,
-                                'filterId': filterId,
                                 'interested': 'No'
                             };
-                            clients.push(client);
+
+                            const element = clients.find(client => client.filter_id === filterId);
+
+                            if (element) {
+                                element.clients.push(client);
+                            } else {
+                                clients.push({
+                                    'filter_id': filterId,
+                                    'clients': [client],
+                                    'status': 'sending'
+                                });
+                            }
                             setFileData(path, clients);
                         });
                     }
