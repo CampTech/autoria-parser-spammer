@@ -1,6 +1,6 @@
 const { parseSearch } = require('./puppeteer.js');
 const { runWhatsappSpammer } = require('./emulator/appium.js');
-const {getFileData, setFileData} = require('./functions');
+const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -14,6 +14,8 @@ const processStatus = [
     'sending',
     'complete'
 ];
+
+const message = 'test';
 
 
 
@@ -29,21 +31,9 @@ app.get('/clients', (req, res) => {
     res.render('clients');
 });
 
-app.post('/client/add', (req,res) => {
-    let data = '';
-    req.on('data', (chunk) => {
-        data += chunk;
-    });
-    req.on('end', () => {
-        const path = './assets/clients.json';
-        getFileData(path, (clients) => {
-            clients = JSON.parse(clients);
-            clients.push(data);
-            console.log(clients);
-            fs.writeFile(path, JSON.stringify(clients), 'utf8', (error) => { });
-            // setFileData(path, client);
-        });
-    });
+app.get('/client/:id', (req, res) => {
+    const id = res.params.id;
+    res.render('client');
 });
 
 app.get('/processing', (req, res) => {
@@ -100,21 +90,21 @@ app.post('/processing/add', (req, res) => {
                     for (const el of data) {
                         if (el.status == 'parsing') {
                             try {
-                                await parseSearch(el).then(() => {
-                                    if (processStatus.indexOf('sending')) {
-                                        const index = data.indexOf(el);
-                                        data[index].status = 'sending';
-                                        setFileData(processing_path, data);
-                                    }
-                                });
+                                await parseSearch(el);
+                                const index = data.indexOf(el);
+                                data[index].status = 'sending';
+                                setFileData(processing_path, data);
                             } catch (error) {
                                 console.error('Ошибка при выполнении запроса:', error);
                             }
                         }
                     }
-                    isProcessing = false;
-                    console.log('yeas');
                     processQueue();
+                    isProcessing = false;
+                } else {
+                    getFileData('./assets/clients.json', (json) => {
+                        runWhatsappSpammer(JSON.parse(json), message);
+                    });
                 }
             });
         }
@@ -123,5 +113,5 @@ app.post('/processing/add', (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Сервер запущен');
+    console.log('Сервер запущений');
 });

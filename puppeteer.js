@@ -1,14 +1,13 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const {getFileData, setFileData} = require('./functions.js');
+const { getFileData, setFileData } = require('./functions.js');
 
 async function isValidPhoneNumber(number) {
     const pattern = /^[\d()]+$/;
     return pattern.test(number);
 }
 
-async function parseAutoRia(urls, browser) {
-    // const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], timeout: 0});
+async function parseAutoRia(urls, browser, filterId) {
     const page = await browser.newPage();
     const phones = [];
 
@@ -32,10 +31,12 @@ async function parseAutoRia(urls, browser) {
                         path = './assets/clients.json';
                         getFileData(path, (clients) => {
                             clients = JSON.parse(clients);
-                            console.log(clients);
-                            clients.push(phoneNumber);
-                            console.log(clients);
-                            // fs.writeFile(path, JSON.stringify(clients), 'utf8', (error) => { });
+                            const client = {
+                                'number': phoneNumber,
+                                'filterId': filterId,
+                                'interested': 'No'
+                            };
+                            clients.push(client);
                             setFileData(path, clients);
                         });
                     }
@@ -49,7 +50,6 @@ async function parseAutoRia(urls, browser) {
 
 function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
     return new Promise(async (resolve, reject) => {
-        console.log('start');
         const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
@@ -99,36 +99,16 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
         await submit.click();
         await page.evaluate((e) => e.click(), submit);
         await page.waitForTimeout(10000);
-        console.log('end');
 
 
         if (await page.$('.item.ticket-title a')) {
             const hrefs = await page.$$eval('.item.ticket-title a', links => links.map(link => link.href));
 
-            const phoneNumbers = await parseAutoRia(hrefs, browser);
+            const phoneNumbers = await parseAutoRia(hrefs, browser, data.id);
             await browser.close();
+            
             console.log('chrome close');
-            if (phoneNumbers.length > 0) {
-                // const url = 'http://127.0.0.1:3000/client/add2';
-                // const requestOptions = {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify(phoneNumbers),
-                // };
-
-                // fetch(url, requestOptions)
-                //     .then(response => response.json())
-                //     .then(data => {
-                //         // console.log(data);
-                //         resolve();
-                //     })
-                //     .catch(error => {
-                //         console.error('Ошибка при выполнении POST-запроса:', error);
-                //         reject(error);
-                //     });
-            }
+            resolve();
         }
     })
 }

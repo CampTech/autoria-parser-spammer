@@ -1,15 +1,9 @@
-console.log('21212');
-
-fetch('/numbers.json')
+fetch('/clients.json')
     .then(response => response.json())
-    .then(numbersArray => {
+    .then(clients => {
         const clientWrapper = document.querySelector('tbody');
-        numbersArray.forEach(number => {
-            const row = `<tr style="cursor: pointer" class="client"><td>${number}</td><td>  </td><td class="text-center">No</td></tr>`;
+        clients.forEach(client => {
+            const row = `<tr style="cursor: pointer" class="client"><td>${client.filterId}</td><td>+38${client.number}</td><td>Name</td><td class="text-center">${client.interested}</td></tr>`;
             clientWrapper.insertAdjacentHTML('beforebegin', row);
-            console.log(number);
         });
     })
-    .catch(error => {
-        console.error('Ошибка при загрузке файла JSON:', error);
-    });
