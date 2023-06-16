@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const {getFileData, setFileData} = require('./functions.js');
 
 async function isValidPhoneNumber(number) {
     const pattern = /^[\d()]+$/;
@@ -15,7 +17,7 @@ async function parseAutoRia(urls, browser) {
     for (let url of urls) {
         index++;
         if (index < 6) {
-            await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
             const phoneElement = await page.$('.phone');
             if (phoneElement) {
                 await phoneElement.click();
@@ -26,8 +28,16 @@ async function parseAutoRia(urls, browser) {
                     if (await isValidPhoneNumber(phoneNumber)) {
                         console.log(phoneNumber);
                         phones.push(phoneNumber);
-                    } else {
-                        console.log('По идеи не правильный ' + phoneNumber)
+
+                        path = './assets/clients.json';
+                        getFileData(path, (clients) => {
+                            clients = JSON.parse(clients);
+                            console.log(clients);
+                            clients.push(phoneNumber);
+                            console.log(clients);
+                            // fs.writeFile(path, JSON.stringify(clients), 'utf8', (error) => { });
+                            setFileData(path, clients);
+                        });
                     }
                 }
             }
@@ -40,9 +50,9 @@ async function parseAutoRia(urls, browser) {
 function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
     return new Promise(async (resolve, reject) => {
         console.log('start');
-        const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+        const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
-        await page.goto(url, {waitUntil: 'networkidle0', timeout: 0});
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
 
         const cookie = await page.$('label.js-close.c-notifier-btn');
         await page.evaluate(() => {
@@ -64,7 +74,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                 await label.click();
                 await page.evaluate((e) => e.click(), label);
                 await label.focus();
-                await input.type(el.value, {delay: 100});
+                await input.type(el.value, { delay: 100 });
                 const liElement = await input.evaluateHandle((e) => {
                     return e.parentElement.querySelector('ul li')
                 });
@@ -97,26 +107,27 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
 
             const phoneNumbers = await parseAutoRia(hrefs, browser);
             await browser.close();
+            console.log('chrome close');
             if (phoneNumbers.length > 0) {
-                const url = 'http://127.0.0.1:3000/processing/add';
-                const requestOptions = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(phoneNumbers),
-                };
+                // const url = 'http://127.0.0.1:3000/client/add2';
+                // const requestOptions = {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(phoneNumbers),
+                // };
 
-                fetch(url, requestOptions)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        resolve();
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при выполнении POST-запроса:', error);
-                        reject(error);
-                    });
+                // fetch(url, requestOptions)
+                //     .then(response => response.json())
+                //     .then(data => {
+                //         // console.log(data);
+                //         resolve();
+                //     })
+                //     .catch(error => {
+                //         console.error('Ошибка при выполнении POST-запроса:', error);
+                //         reject(error);
+                //     });
             }
         }
     })

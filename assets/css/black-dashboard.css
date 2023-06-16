@@ -6004,4 +6004,8 @@ table.tablesorter thead tr .headerSortDown {
   color: #1d253b;
 }
 
+.table {
+  border-collapse: unset;
+}
+
 /*# sourceMappingURL=dashboard-free.css.map */

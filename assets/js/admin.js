@@ -63,7 +63,7 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
     });
     const json = JSON.stringify(data);
 
-    fetch('/parse', {
+    fetch('/processing/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -72,16 +72,10 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-        });
-
-    const alert_wrapper = document.querySelector('.alerts');
-    alert_wrapper.insertAdjacentHTML(
-        "afterbegin", 
-        `<div class="alert alert-success">
+            const alert_wrapper = document.querySelector('.alerts');
+            alert_wrapper.insertAdjacentHTML(
+                "afterbegin",
+                `<div class="alert alert-success">
                     <button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
                         <i class="tim-icons icon-simple-remove"></i>
                     </button>
@@ -89,12 +83,22 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
                         <b> Parsing </b>added to processing
                     </span>
                 </div>
-    `);
-
-
-    const fs = require('fs');
-    const write_data = JSON.stringify(data);
-    fs.writeFile('./assets/processing.json', write_data, 'utf8', (error) => { });
+            `);
+        })
+        .catch(error => {
+            const alert_wrapper = document.querySelector('.alerts');
+            alert_wrapper.insertAdjacentHTML(
+                "afterbegin",
+                `<div class="alert alert-danger">
+                    <button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                    <span>
+                        <b> Parsing </b> don't added to processing, Error: ${error}
+                    </span>
+                </div>
+            `);        
+        });
 
     data = {
         'search': [],
