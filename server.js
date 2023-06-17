@@ -2,6 +2,7 @@ const { parseSearch } = require('./puppeteer.js');
 const { runWhatsappSpammer } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
+const { exec } = require('child_process');
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -104,6 +105,8 @@ app.post('/processing/add', (req, res) => {
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
                         runWhatsappSpammer(filteredData, message);
+                        isProcessing = false;
+                        console.log(isProcessing);
                     });
                 }
             });
@@ -114,4 +117,23 @@ app.post('/processing/add', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Сервер запущений');
+    console.log(test);
 });
+
+let test = 1;
+
+runEmulator();
+
+
+
+function runEmulator() {
+    const emulatorStart = 'docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4';
+    const emulator = exec(emulatorStart);
+
+    emulator.on('exit', (code) => {
+      if (code !== 0) {
+        console.log('Command exited with non-zero status, restarting...');
+        runEmulator();
+      }
+    });
+  }

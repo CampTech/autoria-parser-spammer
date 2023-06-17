@@ -1,6 +1,7 @@
 const { remote } = require('webdriverio');
 const { execSync } = require('child_process');
 const fs = require('fs');
+const { getFileData, setFileData } = require('./../functions.js');
 
 async function runWhatsappSpammer(clients_list, message) {
   const driver = await remote({
@@ -18,21 +19,35 @@ async function runWhatsappSpammer(clients_list, message) {
   });
 
   console.log(clients_list);
+  let index = 0;
 
+  await reloadApp();
   for (const client_list of clients_list) {
     for (const client of client_list.clients) {
+      index++;
       const number = client.number;
       let client_phone = number.replace(/[()]/g, "");
       console.log(client_phone);
-      client_phone = '0968810609';
-      console.log(await sendMessage('38' + client_phone, message));
+      client_phone = '0635201674';
+      if (await sendMessage('38' + client_phone, message)) {
+        client_list.status = 'complete';
+      }
       await new Promise((resolve) => setTimeout(resolve, 30000));
-      await screenshot();
+      executeADBCommand(`exec-out screencap -p > screenshotStep${index}.png`);
       await reloadApp();
     }
-    client_list.status = 'complete';
+
+    getFileData('./assets/clients.json', (json) => {
+      const data = JSON.parse(json);
+      const client = data.find(filter => filter.filter_id === client_list.filter_id);
+
+      client.status = 'complete';
+      console.log(data);
+
+      setFileData('./assets/clients.json', data);
+    })
   }
-  console.log(clients_list);
+  // console.log(clients_list);
 
   async function auth() {
     //Step 1:
@@ -87,7 +102,6 @@ async function runWhatsappSpammer(clients_list, message) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
-      console.log(await driver.$(selector));
       return await driver.$(selector);
     } catch { return null; }
   }
@@ -174,8 +188,8 @@ async function runWhatsappSpammer(clients_list, message) {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       await elSetValue('resourceId("com.whatsapp:id/entry")', message);
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      await elClick('resourceId("com.whatsapp:id/send")');
       if (await findElement('resourceId("com.whatsapp:id/send")')) {
+        await elClick('resourceId("com.whatsapp:id/send")');
         return true;
       }
     }
@@ -207,7 +221,7 @@ function executeADBCommand(command) {
 
 // runWhatsappSpammer([{'number': '0635201674', 'name': 'Andriy'}], 'Youu pidar');
 
-//emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
+//docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
 
 module.exports = {
   runWhatsappSpammer

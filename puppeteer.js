@@ -15,10 +15,13 @@ async function parseAutoRia(urls, browser, filterId) {
 
     for (let url of urls) {
         index++;
-        if (index < 3) {
+        if (index < 11) {
+            console.log(url);
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
             const phoneElement = await page.$('.phone');
             if (phoneElement) {
+                const client_name = await page.evaluate(element => element.textContent, await page.$('#userInfoBlock .seller_info_name'));
+                const client_car = await page.evaluate(element => element.textContent, await page.$('.heading-cars h1.head'));
                 await phoneElement.click();
                 await page.waitForTimeout(4000);
                 let phoneNumber = await page.$eval('.phone', element => element.textContent.trim());
@@ -29,10 +32,12 @@ async function parseAutoRia(urls, browser, filterId) {
                         phones.push(phoneNumber);
 
                         path = './assets/clients.json';
-                        getFileData(path, (clients) => {
+                        await getFileData(path, async (clients) => {
                             clients = JSON.parse(clients);
                             const client = {
                                 'number': phoneNumber,
+                                'name': client_name ? client_name : null,
+                                'car': client_car ? client_car : null,
                                 'interested': 'No'
                             };
 
@@ -90,6 +95,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                 });
                 await page.waitForTimeout(5000);
 
+                await page.waitForTimeout(5000);
                 await liElement.click();
             }
         }
@@ -103,6 +109,8 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
                 }
             }
         }
+        await page.waitForTimeout(5000);
+        await page.screenshot({ path: 'screenshot.png' });
 
         const submit = await page.$('button.button.small');
         await page.waitForTimeout(5000);
