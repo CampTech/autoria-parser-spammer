@@ -20,8 +20,9 @@ async function runWhatsappSpammer(clients_list, message) {
 
   console.log(clients_list);
   let index = 0;
-
+  await auth();
   await reloadApp();
+
   for (const client_list of clients_list) {
     for (const client of client_list.clients) {
       index++;
@@ -43,59 +44,65 @@ async function runWhatsappSpammer(clients_list, message) {
 
       client.status = 'complete';
       console.log(data);
-
       setFileData('./assets/clients.json', data);
     })
+
+    getFileData('./assets/processing.json', (json) => {
+      const data = JSON.parse(json);
+
+      const client = data.find(filter => filter.id === client_list.filter_id);
+      client.status = 'complete';
+      console.log(data);
+      setFileData('./assets/processing.json', data);
+    });
   }
-  // console.log(clients_list);
 
   async function auth() {
     //Step 1:
-    const buttonElement = (await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/next_button")')).click();
+    await elClick('resourceId("com.whatsapp:id/next_button")');
     await new Promise((resolve) => setTimeout(resolve, 25000));
 
-    // //Step2:
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/eula_accept")').click();
-    await new Promise((resolve) => setTimeout(resolve, 25000));
+    if (findElement('resourceId("com.whatsapp:id/eula_accept")')) {
 
-    // //Step3:
-    await driver.$('android=new UiSelector().text("United States")').click();
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/menuitem_search")').click();
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await driver.$('android= new UiSelector().resourceId("com.whatsapp:id/search_src_text")').setValue('Ukraine');
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    const country = await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/country_first_name")');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await country.click();
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/registration_phone")').setValue("688400671");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/registration_submit")').click();
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await driver.$('android=new UiSelector().resourceId("android:id/button1")').click();
-    await new Promise((resolve) => setTimeout(resolve, 15000));
+      // //Step2:
+      await elClick('resourceId("com.whatsapp:id/eula_accept")');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
+      // //Step3:
+      await elClick('text("United States")');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await elClick('resourceId("com.whatsapp:id/menuitem_search")');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await elSetValue('resourceId("com.whatsapp:id/search_src_text")', 'Ukraine');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await elClick('resourceId("com.whatsapp:id/country_first_name")');
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await elSetValue('resourceId("com.whatsapp:id/registration_phone")', '688400671')
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await elClick('resourceId("com.whatsapp:id/registration_submit")');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await elClick('resourceId("android:id/button1")');
+      await new Promise((resolve) => setTimeout(resolve, 15000));
 
-    //Step4:
-    // Sms code
-    // await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/verify_sms_code_input")').setValue('981436');
+      // Sms code
+      await elSetValue('resourceId("com.whatsapp:id/verify_sms_code_input")', '915514');
 
-    //Permissions (use only new accounts and new emulator)
-    // await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/submit")').click();
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
-    // await driver.$('android=new UiSelector().text("Allow")').click();
-    // await new Promise((resolve) => setTimeout(resolve, 5000));  //2x maybe
-    // await driver.$('android=new UiSelector().text("Allow")').click();
-    // await new Promise((resolve) => setTimeout(resolve, 5000)); 
-    // await driver.$('android= new UiSelector().text("Skip")').click();
-    // await new Promise((resolve) => setTimeout(resolve, 10000));
+      //Permissions (use only new accounts and new emulator)
+      await elClick('resourceId("com.whatsapp:id/submit")');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await elClick('text("Allow")');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await elClick('text("Allow")');
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await elClick('text("Skip")');
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
-    //Added info to user
-    const userName = 'Spammer';
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/registration_name")').setValue(userName);
-    await driver.$('android=new UiSelector().resourceId("com.whatsapp:id/register_name_accept")').click();
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+      //Added info to user
+      const userName = 'Spammer';
+      await elSetValue('resourceId("com.whatsapp:id/registration_name")', userName);
+      await elClick('resourceId("com.whatsapp:id/register_name_accept")');
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    }
   }
 
   async function findElement(element, timeout = 16000) {
@@ -219,7 +226,7 @@ function executeADBCommand(command) {
   }
 }
 
-// runWhatsappSpammer([{'number': '0635201674', 'name': 'Andriy'}], 'Youu pidar');
+// runWhatsappSpammer([{ 'number': '0635201674', 'name': 'Andriy' }], 'Youu pidar');
 
 //docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
 

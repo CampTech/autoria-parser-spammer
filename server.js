@@ -2,7 +2,7 @@ const { parseSearch } = require('./puppeteer.js');
 const { runWhatsappSpammer } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -30,8 +30,18 @@ app.get('/clients', (req, res) => {
 });
 
 app.get('/client/:id', (req, res) => {
-    const id = res.params.id;
-    res.render('client');
+    const id = parseInt(req.params.id);
+    getFileData('./assets/clients.json', (json) => {
+        const data = JSON.parse(json);
+
+        console.log(typeof id);
+        const client = data.map(el => el.clients.find(filter => filter.id == id));
+
+        console.log(client);
+
+        res.render('client', client[0]);
+    });
+
 });
 
 app.get('/processing', (req, res) => {
@@ -100,11 +110,11 @@ app.post('/processing/add', (req, res) => {
                     processQueue();
                     isProcessing = false;
                 } else {
-                    getFileData('./assets/clients.json', (json) => {
+                    getFileData('./assets/clients.json', async (json) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
-                        runWhatsappSpammer(filteredData, message);
+                        await runWhatsappSpammer(filteredData, message);
                         isProcessing = false;
                         console.log(isProcessing);
                     });
@@ -117,23 +127,24 @@ app.post('/processing/add', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Сервер запущений');
-    console.log(test);
+    runEmulator();
 });
 
 let test = 1;
 
-runEmulator();
-
 
 
 function runEmulator() {
-    const emulatorStart = 'docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4';
-    const emulator = exec(emulatorStart);
+    const docker = 'docker';
+    const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
+    const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
 
-    emulator.on('exit', (code) => {
+    emulatorProcess.on('exit', async (code) => {
       if (code !== 0) {
+        await spawn(docker, ['restart', 'androidContainer']);
+        console.log('restart');
         console.log('Command exited with non-zero status, restarting...');
-        runEmulator();
+        await runEmulator();
       }
     });
   }

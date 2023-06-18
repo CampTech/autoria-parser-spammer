@@ -15,7 +15,7 @@ async function parseAutoRia(urls, browser, filterId) {
 
     for (let url of urls) {
         index++;
-        if (index < 11) {
+        if (index < 4) {
             console.log(url);
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
             const phoneElement = await page.$('.phone');
@@ -34,7 +34,16 @@ async function parseAutoRia(urls, browser, filterId) {
                         path = './assets/clients.json';
                         await getFileData(path, async (clients) => {
                             clients = JSON.parse(clients);
+
+                            const maxId = clients.reduce((max, item) => {
+                                const clients = item.clients;
+                                const clientIds = clients.map(client => parseInt(client.id));
+                                const currentMax = Math.max(...clientIds);
+                                return Math.max(max, currentMax);
+                              }, 0);
+                            
                             const client = {
+                                'id': maxId + 1,
                                 'number': phoneNumber,
                                 'name': client_name ? client_name : null,
                                 'car': client_car ? client_car : null,
