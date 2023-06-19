@@ -195,7 +195,7 @@
                     <div class="col-md-6 px-md-1">
                       <div class="form-group">
                         <label>Client messanger</label>
-                        <input type="text" class="form-control" placeholder="Username" value="Whatsapp">
+                        <input type="text" class="form-control" placeholder="Messanger" value="Whatsapp">
                       </div>
                     </div>
                   </div>
@@ -204,15 +204,18 @@
                       <div class="form-group">
                         <label>Message to client</label>
                         <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your description"
-                          value="Mike">Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.</textarea>
+                          value=""><%= message_to %></textarea>
                       </div>
                     </div>
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label>Message output from client</label>
-                        <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your description" value="Mike">Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.</textarea>
+                    <% if (typeof message_from !=='undefined' ) { %>
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label>Message output from client</label>
+                          <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your description"
+                            value=""><%= message_from %></textarea>
+                        </div>
                       </div>
-                  </div>
+                      <% } %>
                   </div>
                 </form>
               </div>
@@ -421,6 +424,10 @@
         });
       });
     });
+  </script>
+
+  <script>
+
   </script>
 </body>
 

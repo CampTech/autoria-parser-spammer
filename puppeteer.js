@@ -47,7 +47,8 @@ async function parseAutoRia(urls, browser, filterId) {
                                 'number': phoneNumber,
                                 'name': client_name ? client_name : null,
                                 'car': client_car ? client_car : null,
-                                'interested': 'No'
+                                'interested': 'No',
+                                'messanger': 'None'
                             };
 
                             const element = clients.find(client => client.filter_id === filterId);
