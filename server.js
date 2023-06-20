@@ -1,5 +1,5 @@
 const { parseSearch } = require('./puppeteer.js');
-const { runWhatsappSpammer, checkInterestedStatus } = require('./emulator/appium.js');
+const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, logout } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
@@ -9,14 +9,12 @@ const app = express();
 
 let isProcessing = false;
 const processing_path = './assets/processing.json';
-const processStatus = [
-    'error',
-    'parsing',
-    'sending',
-    'complete'
-];
 
-const message = 'test';
+const message = 'Testing';
+
+app.get('/login', (req, res) => {
+    res.render('login');
+})
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'assets')));
@@ -28,8 +26,8 @@ app.get('/', (req, res) => {
 app.get('/clients', async (req, res) => {
     res.render('clients');
 
-    // const interested = await checkInterestedStatus();
-    const interested = false;
+    const interested = await checkInterestedStatus();
+    // const interested = false;
 
     if (interested) {
         getFileData('./assets/clients.json', (json) => {
@@ -130,7 +128,7 @@ app.post('/processing/add', (req, res) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
-                        // await runWhatsappSpammer(filteredData, message);
+                        await runWhatsappSpammer(filteredData, message);
                         isProcessing = false;
                     });
                 }
@@ -140,12 +138,63 @@ app.post('/processing/add', (req, res) => {
 
 });
 
-app.listen(3000, () => {
-    console.log('Сервер запущений');
-    // runEmulator();
+app.get('/config', async (req, res) => {
+    res.render('config');
+
+    if (!isProcessing) {
+        isProcessing = true;
+        const check = await checkAuth();
+        isProcessing = false;
+
+        const data = {
+            'auth': check
+        }
+
+        setFileData('./assets/config.json', data);
+    }
+
 });
 
-let test = 1;
+app.post('/config/auth', (req, res) => {
+    let json = '';
+
+    req.on('data', (chunk) => {
+        json += chunk;
+    });
+
+    req.on('end', () => {
+        const data = JSON.parse(json);
+
+        console.log(data);
+        if (data.code === null) {
+            auth(data.number);
+        } else {
+            authNextStep(data.bot_name, data.code);
+        }
+
+        res.statusCode = 200;
+        res.end(JSON.stringify(true));
+    });
+});
+
+app.get('/config/logout', (req, res) => {
+    if (!isProcessing) {
+        isProcessing = true;
+        logout();
+        isProcessing = false;
+        const data = {
+            'auth': false
+        }
+        setFileData('./assets/config.json', data);
+    }
+});
+
+
+
+app.listen(3000, () => {
+    console.log('Сервер запущений');
+    runEmulator();
+});
 
 
 
@@ -153,7 +202,15 @@ function runEmulator() {
     const docker = 'docker';
     const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
     const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
+    new Promise((resolve) => setTimeout(resolve, 5000));
     const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    new Promise((resolve) => setTimeout(resolve, 5000));
+
+    appiumProcess.on('exit', (code) => {
+        if (code !== 0) {
+            spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+        }
+    })
 
     emulatorProcess.on('exit', async (code) => {
         if (code !== 0) {
@@ -164,9 +221,9 @@ function runEmulator() {
         }
     });
 
-    appiumProcess.on('exit', async (code) => {
-        if (code !== 0) {
-            await runEmulator();
-        }
-    });
+    // appiumProcess.on('exit', async (code) => {
+    //     if (code !== 0) {
+    //         await runEmulator();
+    //     }
+    // });
 }
