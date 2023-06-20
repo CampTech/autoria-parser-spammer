@@ -143,11 +143,12 @@
                     <div class="col-md-6 px-md-1">
                       <div class="form-group">
                         <label>Client messanger</label>
-                        <input type="text" class="form-control" placeholder="Messanger" value="Whatsapp">
+                        <input type="text" class="form-control" placeholder="Messanger" value="<%= messanger %>">
                       </div>
                     </div>
                   </div>
                   <div class="row">
+                    <% if (typeof message_from !=='undefined') { %>
                     <div class="col-md-12">
                       <div class="form-group">
                         <label>Message to client</label>
@@ -155,6 +156,7 @@
                           value=""><%= message_to %></textarea>
                       </div>
                     </div>
+                    <% } %>
                     <% if (typeof message_from !=='undefined' ) { %>
                       <div class="col-md-12">
                         <div class="form-group">
@@ -174,35 +176,6 @@
           </div>
         </div>
       </div>
-      <footer class="footer">
-        <div class="container-fluid">
-          <nav>
-            <ul>
-              <li>
-                <a href="https://www.creative-tim.com">
-                  Creative Tim
-                </a>
-              </li>
-              <li>
-                <a href="http://presentation.creative-tim.com">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="http://blog.creative-tim.com">
-                  Blog
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <div class="copyright float-right">
-            ©
-            <script>
-              document.write(new Date().getFullYear())
-            </script> made with <i class="tim-icons icon-heart-2"></i> by
-            <a href="https://www.creative-tim.com" target="_blank">Creative Tim</a> for a better web.
-          </div>
-      </footer>
     </div>
   </div>
   <div class="fixed-plugin">

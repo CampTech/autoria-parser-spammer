@@ -26,8 +26,13 @@ app.get('/', (req, res) => {
 app.get('/clients', async (req, res) => {
     res.render('clients');
 
+    // if (!isProcessing) {
+    //     // const interested = await checkInterestedStatus();
+    // } else {
+    //     const interested = false;
+    // }
+
     const interested = await checkInterestedStatus();
-    // const interested = false;
 
     if (interested) {
         getFileData('./assets/clients.json', (json) => {
@@ -193,7 +198,7 @@ app.get('/config/logout', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Сервер запущений');
-    runEmulator();
+    // runEmulator();
 });
 
 
@@ -203,14 +208,14 @@ function runEmulator() {
     const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
     const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
     new Promise((resolve) => setTimeout(resolve, 5000));
-    const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    // const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
     new Promise((resolve) => setTimeout(resolve, 5000));
 
-    appiumProcess.on('exit', (code) => {
-        if (code !== 0) {
-            spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
-        }
-    })
+    // appiumProcess.on('exit', (code) => {
+    //     if (code !== 0) {
+    //         spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    //     }
+    // })
 
     emulatorProcess.on('exit', async (code) => {
         if (code !== 0) {

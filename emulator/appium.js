@@ -303,12 +303,10 @@ async function logout() {
       'appium:appActivity': 'com.whatsapp.Main',
       "appium:automationName": 'uiautomator2',
       'appium:noReset': false,
-      'appium:fullReset': true,
+      'appium:fullReset': false,
     }
   });
 
-  await driver.resetApp();
-  await driver.resetApp();
   await driver.deleteSession();
 }
 
@@ -326,6 +324,10 @@ async function auth(number) {
       'appium:fullReset': false,
     }
   });
+
+  await driver.closeApp();
+  await driver.launchApp();
+
 
   const registration_phone = number.replace(/^\+380/, "");
   //Step 1:
@@ -352,10 +354,13 @@ async function auth(number) {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     await elClick('resourceId("android:id/button1")');
     await new Promise((resolve) => setTimeout(resolve, 15000));
+
+    executeADBCommand(`exec-out screencap -p > ./assets/screenshot.png`);
   }
+
   await driver.deleteSession();
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 10000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -401,6 +406,7 @@ async function authNextStep(bot_name, code) {
     }
   });
 
+  await new Promise((resolve) => setTimeout(resolve, 30000));
   await elSetValue('resourceId("com.whatsapp:id/verify_sms_code_input")', code);
   await elClick('resourceId("com.whatsapp:id/submit")');
   await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -415,10 +421,12 @@ async function authNextStep(bot_name, code) {
   await elClick('resourceId("com.whatsapp:id/register_name_accept")');
   await new Promise((resolve) => setTimeout(resolve, 10000));
 
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
   await driver.deleteSession();
 
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 25000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -449,8 +457,13 @@ async function authNextStep(bot_name, code) {
   }
 }
 
+// executeADBCommand(`exec-out screencap -p > screenshotStep.png`);
+// authNextStep('Spammer', '154073');
+
 
 // runWhatsappSpammer([{ "filter_id": 1, "clients": [{ "id": 1, "number": "(063)2591205", "name": " Олексій", "car": "Audi Q7 2008", "interested": "No" }, { "id": 2, "number": "(050)9487347", "name": " Владимир", "car": "Audi Q7 2019", "interested": "No" }], "status": "sending" }], 'Youu pidar');
+// authNextStep('Spammer', '159865');
+executeADBCommand(`exec-out screencap -p > screenshotStep.png`);
 
 //docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
 //docker exec --privileged -it androidContainer bash -c "appium -p 5900"
