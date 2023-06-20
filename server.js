@@ -28,7 +28,8 @@ app.get('/', (req, res) => {
 app.get('/clients', async (req, res) => {
     res.render('clients');
 
-    const interested = await checkInterestedStatus();
+    // const interested = await checkInterestedStatus();
+    const interested = false;
 
     if (interested) {
         getFileData('./assets/clients.json', (json) => {
@@ -129,7 +130,7 @@ app.post('/processing/add', (req, res) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
-                        await runWhatsappSpammer(filteredData, message);
+                        // await runWhatsappSpammer(filteredData, message);
                         isProcessing = false;
                     });
                 }
@@ -152,13 +153,19 @@ function runEmulator() {
     const docker = 'docker';
     const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
     const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
-    spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
 
     emulatorProcess.on('exit', async (code) => {
         if (code !== 0) {
             await spawn(docker, ['restart', 'androidContainer']);
             console.log('restart');
             console.log('Command exited with non-zero status, restarting...');
+            await runEmulator();
+        }
+    });
+
+    appiumProcess.on('exit', async (code) => {
+        if (code !== 0) {
             await runEmulator();
         }
     });

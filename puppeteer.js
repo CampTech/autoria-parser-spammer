@@ -13,7 +13,7 @@ async function parseAutoRia(urls, browser, filterId) {
 
     let index = 0;
 
-    for (let url of urls) {
+    mainLoop: for (let url of urls) {
         index++;
         if (index < 4) {
             console.log(url);
@@ -34,35 +34,46 @@ async function parseAutoRia(urls, browser, filterId) {
                         path = './assets/clients.json';
                         await getFileData(path, async (clients) => {
                             clients = JSON.parse(clients);
-
-                            const maxId = clients.reduce((max, item) => {
-                                const clients = item.clients;
-                                const clientIds = clients.map(client => parseInt(client.id));
-                                const currentMax = Math.max(...clientIds);
-                                return Math.max(max, currentMax);
-                              }, 0);
-                            
-                            const client = {
-                                'id': maxId + 1,
-                                'number': phoneNumber,
-                                'name': client_name ? client_name : null,
-                                'car': client_car ? client_car : null,
-                                'interested': 'No',
-                                'messanger': 'None'
-                            };
-
-                            const element = clients.find(client => client.filter_id === filterId);
-
-                            if (element) {
-                                element.clients.push(client);
-                            } else {
-                                clients.push({
-                                    'filter_id': filterId,
-                                    'clients': [client],
-                                    'status': 'sending'
-                                });
+                            let foundMath = false;
+                            for (const el of clients) {
+                                for (const client of el.clients) {
+                                    if (client.number === phoneNumber) {
+                                        console.log('Номер совпал :)');
+                                        foundMath = true;
+                                    }
+                                }
                             }
-                            setFileData(path, clients);
+                            if (!foundMath) {
+                                const maxId = clients.reduce((max, item) => {
+                                    const clients = item.clients;
+                                    const clientIds = clients.map(client => parseInt(client.id));
+                                    const currentMax = Math.max(...clientIds);
+                                    return Math.max(max, currentMax);
+                                }, 0);
+
+                                const client = {
+                                    'id': maxId + 1,
+                                    'number': phoneNumber,
+                                    'name': client_name ? client_name : null,
+                                    'car': client_car ? client_car : null,
+                                    'interested': 'No',
+                                    'messanger': 'None'
+                                };
+
+                                const element = clients.find(client => client.filter_id === filterId);
+
+                                if (element) {
+                                    element.clients.push(client);
+                                } else {
+                                    clients.push({
+                                        'filter_id': filterId,
+                                        'clients': [client],
+                                        'status': 'sending'
+                                    });
+                                }
+                                setFileData(path, clients);
+                                console.log('Номер записан');
+                            }
                         });
                     }
                 }
@@ -134,7 +145,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
 
             const phoneNumbers = await parseAutoRia(hrefs, browser, data.id);
             await browser.close();
-            
+
             console.log('chrome close');
             resolve();
         }

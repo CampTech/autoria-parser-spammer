@@ -9,3 +9,21 @@ fetch('/clients.json')
             });
         });
     })
+let filtered = false;
+document.querySelector('.filter').addEventListener('click', () => {
+    filtered = true ? !filtered : filtered
+    if (filtered) {
+        
+    }
+    const allClients = document.querySelectorAll('.table tbody');
+
+    allClients.forEach(client => {
+        if (client.querySelector('td:last-child').innerText == 'No') {
+            if (filtered) {
+                client.style.display = 'none';
+            } else {
+                client.style.display = 'table-row-group';
+            }
+        }
+    })
+});
