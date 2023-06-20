@@ -26,6 +26,31 @@ function enumElements(el) {
 }
 
 document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
+    let auth = true;
+    fetch('/config.json')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.auth) {
+                auth = false;
+            }
+        });
+
+    if (!auth) {
+        const alert_wrapper = document.querySelector('.alerts');
+            alert_wrapper.insertAdjacentHTML(
+                "afterbegin",
+                `<div class="alert alert-warning">
+                    <button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
+                        <i class="tim-icons icon-simple-remove"></i>
+                    </button>
+                    <span>
+                        <b> Bot </b> is not auth.
+                    </span>
+                </div>
+            `);
+            return;
+    }
+
     document.querySelectorAll('input').forEach(el => {
         if (el.getAttribute('type') === 'search' && el.value !== '') {
             const allAttributesText = 'input' + enumElements(el);
@@ -97,7 +122,7 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
                         <b> Parsing </b> don't added to processing, Error: ${error}
                     </span>
                 </div>
-            `);        
+            `);
         });
 
     data = {
@@ -105,8 +130,6 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
         'radio': [],
         'select': []
     };
-
-
 });
 
 const input = document.querySelector('input#autocompleteInput-brand-0');
