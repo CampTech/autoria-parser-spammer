@@ -1,21 +1,20 @@
 const { parseSearch } = require('./puppeteer.js');
-const { runWhatsappSpammer } = require('./emulator/appium.js');
+const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, logout } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const express = require('express');
 const app = express();
 
 let isProcessing = false;
 const processing_path = './assets/processing.json';
-const processStatus = [
-    'error',
-    'parsing',
-    'sending',
-    'complete'
-];
 
-const message = 'test';
+const message = 'Testing';
+
+app.get('/login', (req, res) => {
+    res.render('login');
+})
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'assets')));
@@ -24,13 +23,44 @@ app.get('/', (req, res) => {
     res.render('dashboard');
 });
 
-app.get('/clients', (req, res) => {
+app.get('/clients', async (req, res) => {
     res.render('clients');
+
+    // if (!isProcessing) {
+    //     // const interested = await checkInterestedStatus();
+    // } else {
+    //     const interested = false;
+    // }
+
+    const interested = await checkInterestedStatus();
+
+    if (interested) {
+        getFileData('./assets/clients.json', (json) => {
+            const data = JSON.parse(json);
+
+            for (const interes of interested) {
+                // interes.number = '(050)0344004';
+                data.forEach(el => {
+                    const number = el.clients.find(filter => filter.number === interes.number);
+                    if (number) {
+                        number.interested = 'Yes';
+                        number.message_from = interes.message;
+                    }
+                });
+            }
+            setFileData('./assets/clients.json', data);
+        });
+    }
 });
 
-app.get('/client/:id', (req, res) => {
-    const id = res.params.id;
-    res.render('client');
+app.get('/client/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+
+    getFileData('./assets/clients.json', async (json) => {
+        const data = JSON.parse(json);
+        const client = data.map(el => el.clients.find(filter => filter.id == id));
+        res.render('client', client[0]);
+    });
 });
 
 app.get('/processing', (req, res) => {
@@ -99,11 +129,12 @@ app.post('/processing/add', (req, res) => {
                     processQueue();
                     isProcessing = false;
                 } else {
-                    getFileData('./assets/clients.json', (json) => {
+                    getFileData('./assets/clients.json', async (json) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
-                        runWhatsappSpammer(filteredData, message);
+                        await runWhatsappSpammer(filteredData, message);
+                        isProcessing = false;
                     });
                 }
             });
@@ -112,6 +143,92 @@ app.post('/processing/add', (req, res) => {
 
 });
 
+app.get('/config', async (req, res) => {
+    res.render('config');
+
+    if (!isProcessing) {
+        isProcessing = true;
+        const check = await checkAuth();
+        isProcessing = false;
+
+        const data = {
+            'auth': check
+        }
+
+        setFileData('./assets/config.json', data);
+    }
+
+});
+
+app.post('/config/auth', (req, res) => {
+    let json = '';
+
+    req.on('data', (chunk) => {
+        json += chunk;
+    });
+
+    req.on('end', () => {
+        const data = JSON.parse(json);
+
+        console.log(data);
+        if (data.code === null) {
+            auth(data.number);
+        } else {
+            authNextStep(data.bot_name, data.code);
+        }
+
+        res.statusCode = 200;
+        res.end(JSON.stringify(true));
+    });
+});
+
+app.get('/config/logout', (req, res) => {
+    if (!isProcessing) {
+        isProcessing = true;
+        logout();
+        isProcessing = false;
+        const data = {
+            'auth': false
+        }
+        setFileData('./assets/config.json', data);
+    }
+});
+
+
+
 app.listen(3000, () => {
     console.log('Сервер запущений');
+    // runEmulator();
 });
+
+
+
+function runEmulator() {
+    const docker = 'docker';
+    const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
+    const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
+    new Promise((resolve) => setTimeout(resolve, 5000));
+    // const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    new Promise((resolve) => setTimeout(resolve, 5000));
+
+    // appiumProcess.on('exit', (code) => {
+    //     if (code !== 0) {
+    //         spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    //     }
+    // })
+
+    emulatorProcess.on('exit', async (code) => {
+        if (code !== 0) {
+            await spawn(docker, ['restart', 'androidContainer']);
+            console.log('restart');
+            console.log('Command exited with non-zero status, restarting...');
+            await runEmulator();
+        }
+    });
+
+    // appiumProcess.on('exit', async (code) => {
+    //     if (code !== 0) {
+    //         await runEmulator();
+    //     }
+    // });
+}
