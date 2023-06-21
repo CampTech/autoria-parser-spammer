@@ -30,12 +30,15 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
     fetch('/config.json')
         .then(response => response.json())
         .then(data => {
-            if (!data.auth) {
+            console.log(data);
+            if (data.auth === false) {
                 auth = false;
             }
         });
 
-    if (!auth) {
+        console.log(auth);
+
+    if (auth === false) {
         const alert_wrapper = document.querySelector('.alerts');
             alert_wrapper.insertAdjacentHTML(
                 "afterbegin",

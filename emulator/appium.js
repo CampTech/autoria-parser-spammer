@@ -16,6 +16,10 @@ async function getRemote() {
       'appium:noReset': true,
       'appium:fullReset': false,
       'appium:newCommandTimeout': 0,
+      'appium:adbExecTimeout': 2147483647,
+      'appium:appWaitDuration': 0,
+      'appium:uiautomator2ServerLaunchTimeout': 6000000
+
     }
   });
   return driver;
@@ -254,22 +258,9 @@ async function checkAuth(driver) {
   }
 }
 
-async function logout() {
-  const driver = await remote({
-    path: '/',
-    port: 5900,
-    capabilities: {
-      platformName: 'Android',
-      'appium:deviceName': 'Nexus 6',
-      'appium:appPackage': 'com.whatsapp',
-      'appium:appActivity': 'com.whatsapp.Main',
-      "appium:automationName": 'uiautomator2',
-      'appium:noReset': false,
-      'appium:fullReset': false,
-    }
-  });
-
-  await driver.deleteSession();
+async function logout(driver) {
+  await executeADBCommand('shell pm clear com.whatsapp');
+  await driver.launchApp();
 }
 
 async function auth(driver, number) {
@@ -302,8 +293,6 @@ async function auth(driver, number) {
     await new Promise((resolve) => setTimeout(resolve, 20000));
     await elClick('resourceId("android:id/button1")');
     await new Promise((resolve) => setTimeout(resolve, 15000));
-
-    executeADBCommand(`exec-out screencap -p > ./assets/screenshot.png`);
   }
 
   async function findElement(element, timeout = 10000) {
@@ -347,13 +336,11 @@ async function authNextStep(driver, bot_name, code) {
   await elClick('text("Allow")');
   await new Promise((resolve) => setTimeout(resolve, 5000));
   await elClick('text("Skip")');
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) => setTimeout(resolve, 15000));
 
   await elSetValue('resourceId("com.whatsapp:id/registration_name")', bot_name);
+  await new Promise((resolve) => setTimeout(resolve, 15000));
   await elClick('resourceId("com.whatsapp:id/register_name_accept")');
-  await new Promise((resolve) => setTimeout(resolve, 10000));
-
-  await new Promise((resolve) => setTimeout(resolve, 5000));
 
 
   async function findElement(element, timeout = 35000) {

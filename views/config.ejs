@@ -152,7 +152,7 @@
                     <div class="col-md px-md-1">
                       <div class="form-group">
                         <label>Message</label>
-                        <textarea rows="4" cols="80" class="form-control" placeholder="Message"
+                        <textarea id="message" rows="4" cols="80" class="form-control" placeholder="Message"
                           value=""></textarea>
                       </div>
                     </div>
@@ -325,11 +325,14 @@
         index0.classList.add('d-none');
         index1.classList.remove('d-none');
         index2.classList.add('d-none');
-
       }
       if (step === 1) {
         index1.classList.add('d-none');
         index2.classList.remove('d-none');
+        document.querySelector('#btn').setAttribute('disabled', 'disabled');
+        document.querySelector('#code').addEventListener('input', () => {
+          document.querySelector('#btn').removeAttribute('disabled');
+        });
       }
 
       if (step === 2) {
@@ -338,17 +341,20 @@
       }
 
       if (step === 3) {
-        
+        index2.classList.add('d-none');
+        index0.classList.remove('d-none');
       }
 
       const botName = document.querySelector('#bot_name').value;
       const number = document.querySelector('#number').value;
       const code = document.querySelector('#code').value;
+      const message = document.querySelector('#message').value;
 
       const data = {
         'bot_name': botName !== '' ? botName : null,
         'number': number !== '' ? number : null,
-        'code': code !== '' ? code : null
+        'code': code !== '' ? code : null,
+        'message': message !== '' ? message : null
       }
 
       fetch('/config/auth', {

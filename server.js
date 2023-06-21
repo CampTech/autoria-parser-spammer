@@ -10,13 +10,17 @@ const app = express();
 let isProcessing = false;
 const processing_path = './assets/processing.json';
 
-const message = 'Testing';
+let message = '';
 
 
 let driver;
 
 (async () => {
     driver = await getRemote();
+
+    getFileData('./assets/message.json', (data) => {
+        message = data;
+    });
 })();
 
 app.get('/login', (req, res) => {
@@ -176,6 +180,11 @@ app.post('/config/auth', (req, res) => {
             authNextStep(driver, data.bot_name, data.code);
         }
 
+        if (data.message !== null) {
+            message = data.message;
+            setFileData('./assets/message.json', data.message);
+        }
+
         res.statusCode = 200;
         res.end(JSON.stringify(true));
     });
@@ -184,7 +193,7 @@ app.post('/config/auth', (req, res) => {
 app.get('/config/logout', (req, res) => {
     if (!isProcessing) {
         isProcessing = true;
-        logout();
+        logout(driver);
         isProcessing = false;
         const data = {
             'auth': false
