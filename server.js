@@ -1,5 +1,5 @@
 const { parseSearch } = require('./puppeteer.js');
-const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, logout } = require('./emulator/appium.js');
+const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, logout, getRemote } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
@@ -11,6 +11,13 @@ let isProcessing = false;
 const processing_path = './assets/processing.json';
 
 const message = 'Testing';
+
+
+let driver;
+
+(async () => {
+    driver = await getRemote();
+})();
 
 app.get('/login', (req, res) => {
     res.render('login');
@@ -26,20 +33,13 @@ app.get('/', (req, res) => {
 app.get('/clients', async (req, res) => {
     res.render('clients');
 
-    // if (!isProcessing) {
-    //     // const interested = await checkInterestedStatus();
-    // } else {
-    //     const interested = false;
-    // }
-
-    const interested = await checkInterestedStatus();
+    const interested = await checkInterestedStatus(driver);
 
     if (interested) {
         getFileData('./assets/clients.json', (json) => {
             const data = JSON.parse(json);
 
             for (const interes of interested) {
-                // interes.number = '(050)0344004';
                 data.forEach(el => {
                     const number = el.clients.find(filter => filter.number === interes.number);
                     if (number) {
@@ -127,13 +127,12 @@ app.post('/processing/add', (req, res) => {
                         }
                     }
                     processQueue();
-                    isProcessing = false;
                 } else {
                     getFileData('./assets/clients.json', async (json) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
                         isProcessing = true;
-                        await runWhatsappSpammer(filteredData, message);
+                        await runWhatsappSpammer(driver, filteredData, message);
                         isProcessing = false;
                     });
                 }
@@ -148,7 +147,7 @@ app.get('/config', async (req, res) => {
 
     if (!isProcessing) {
         isProcessing = true;
-        const check = await checkAuth();
+        const check = await checkAuth(driver);
         isProcessing = false;
 
         const data = {
@@ -172,9 +171,9 @@ app.post('/config/auth', (req, res) => {
 
         console.log(data);
         if (data.code === null) {
-            auth(data.number);
+            auth(driver, data.number);
         } else {
-            authNextStep(data.bot_name, data.code);
+            authNextStep(driver, data.bot_name, data.code);
         }
 
         res.statusCode = 200;
@@ -211,12 +210,6 @@ function runEmulator() {
     // const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
     new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // appiumProcess.on('exit', (code) => {
-    //     if (code !== 0) {
-    //         spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
-    //     }
-    // })
-
     emulatorProcess.on('exit', async (code) => {
         if (code !== 0) {
             await spawn(docker, ['restart', 'androidContainer']);
@@ -225,10 +218,4 @@ function runEmulator() {
             await runEmulator();
         }
     });
-
-    // appiumProcess.on('exit', async (code) => {
-    //     if (code !== 0) {
-    //         await runEmulator();
-    //     }
-    // });
 }
