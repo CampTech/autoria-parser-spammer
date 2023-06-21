@@ -15,7 +15,7 @@ async function parseAutoRia(urls, browser, filterId) {
 
     mainLoop: for (let url of urls) {
         index++;
-        if (index < 2) {
+        // if (index < 2) {
             console.log(url);
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
             const phoneElement = await page.$('.phone');
@@ -78,7 +78,7 @@ async function parseAutoRia(urls, browser, filterId) {
                     }
                 }
             }
-        }
+        // }
     }
     return phones;
 }

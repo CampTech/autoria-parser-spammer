@@ -15,6 +15,7 @@ async function getRemote() {
       "appium:automationName": 'uiautomator2',
       'appium:noReset': true,
       'appium:fullReset': false,
+      'appium:newCommandTimeout': 0,
     }
   });
   return driver;
@@ -177,8 +178,6 @@ async function checkInterestedStatus(driver) {
     } else {
       console.log(false);
       await driver.closeApp();
-      await driver.deleteSession();
-      // return clients;
     }
   }
 
@@ -226,6 +225,8 @@ async function checkInterestedStatus(driver) {
 }
 
 async function checkAuth(driver) {
+  driver.closeApp();
+  driver.launchApp();
 
   await elClick('resourceId("com.whatsapp:id/next_button")');
   if (await findElement('resourceId("com.whatsapp:id/eula_accept")')) {
