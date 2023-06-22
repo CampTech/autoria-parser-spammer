@@ -9,6 +9,13 @@ document.querySelectorAll('input[type="radio"]').forEach(el => {
     if (label.innerText === 'Приватна особа') {
         el.checked = true;
     }
+
+    el.addEventListener('click', (evt) => {
+        document.querySelectorAll('input[type="radio"]').forEach(element => {
+            element.checked = false;
+        });
+        el.checked;
+    });
 });
 
 function enumElements(el) {

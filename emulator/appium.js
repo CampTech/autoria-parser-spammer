@@ -22,16 +22,22 @@ async function getRemote() {
 
     }
   });
+  try {
+    const wait = await driver.$('android=new UiSelector().text("Wait")');
+    await wait.click();
+    executeADBCommand(`exec-out screencap -p > screenshot.png`);
+  } catch { }
+
   return driver;
 }
 
 async function runWhatsappSpammer(driver, clients_list, message) {
   let index = 0;
-  await reloadApp();
-  if (findElement('text("Send message")')) {
-    await elClick('text("Send message")');
-    await addNewClient('SCFW', 'Maker', '0635201674');
-  }
+  // await reloadApp();
+  // if (findElement('text("Send message")')) {
+  //   await elClick('text("Send message")');
+  //   await addNewClient('SCFW', 'Maker', '0635201674');
+  // }
 
   for (const client_list of clients_list) {
     for (const client of client_list.clients) {
@@ -69,7 +75,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
     });
   }
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 30000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -140,10 +146,10 @@ async function runWhatsappSpammer(driver, clients_list, message) {
   }
 
   async function sendMessage(client_phone, message) {
-    if (await findElement('text("Send message")')) {
-      await elClick('text("Send message")');
-    } else {
+    if (await findElement('resourceId("com.whatsapp:id/fab")')) {
       await elClick('resourceId("com.whatsapp:id/fab")');
+    } else {
+      await findElement('text("Send message")');
     }
 
     await elClick('resourceId("com.whatsapp:id/menuitem_search")');

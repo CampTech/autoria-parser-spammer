@@ -174,13 +174,13 @@ app.post('/config/auth', (req, res) => {
         const data = JSON.parse(json);
 
         console.log(data);
-        if (data.code === null) {
-            auth(driver, data.number);
+        if (data.message === null) {
+            if (data.code === null) {
+                auth(driver, data.number);
+            } else {
+                authNextStep(driver, data.bot_name, data.code);
+            }
         } else {
-            authNextStep(driver, data.bot_name, data.code);
-        }
-
-        if (data.message !== null) {
             message = data.message;
             setFileData('./assets/message.json', data.message);
         }
