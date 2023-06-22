@@ -151,15 +151,22 @@ async function runWhatsappSpammer(driver, clients_list, message) {
     } else {
       await findElement('text("Send message")');
     }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     await elClick('resourceId("com.whatsapp:id/menuitem_search")');
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await elClick('resourceId("com.whatsapp:id/search_src_text")');
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await elSetValue('resourceId("com.whatsapp:id/search_src_text")', client_phone);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     if (await findElement(`text("No results found for '${client_phone}'")`)) {
       return false;
     }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await elClick('resourceId("com.whatsapp:id/contactpicker_text_container")');
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await elSetValue('resourceId("com.whatsapp:id/entry")', message);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     if (await findElement('resourceId("com.whatsapp:id/send")')) {
       await elClick('resourceId("com.whatsapp:id/send")');
       return true;
@@ -175,8 +182,6 @@ async function runWhatsappSpammer(driver, clients_list, message) {
   // console.log(await driver.getPageSource());
 
   await screenshot();
-
-  await driver.deleteSession();
 }
 
 async function checkInterestedStatus(driver) {
@@ -204,7 +209,7 @@ async function checkInterestedStatus(driver) {
     })
   }
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 36000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -244,7 +249,7 @@ async function checkAuth(driver) {
   }
   return true;
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 36000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -262,11 +267,6 @@ async function checkAuth(driver) {
       console.log(`element ${el} undefined` + '' + err);
     }
   }
-}
-
-async function logout(driver) {
-  await executeADBCommand('shell pm clear com.whatsapp');
-  await driver.launchApp();
 }
 
 async function auth(driver, number) {
@@ -390,6 +390,8 @@ function executeADBCommand(command) {
   }
 }
 
+executeADBCommand(`exec-out screencap -p > screenshotStep.png`);
+
 //docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
 //docker exec --privileged -it androidContainer bash -c "appium -p 5900"
 
@@ -399,6 +401,5 @@ module.exports = {
   auth,
   authNextStep,
   checkAuth,
-  logout,
   getRemote
 };

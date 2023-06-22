@@ -10,13 +10,24 @@ document.querySelectorAll('input[type="radio"]').forEach(el => {
         el.checked = true;
     }
 
-    el.addEventListener('click', (evt) => {
-        document.querySelectorAll('input[type="radio"]').forEach(element => {
-            element.checked = false;
-        });
-        el.checked;
-    });
+    // el.addEventListener('click', (evt) => {
+    //     document.querySelectorAll('input[type="radio"]').forEach(element => {
+    //         element.checked = false;
+    //     });
+    //     el.checked;
+    // });
 });
+const checkboxes = document.querySelectorAll('#countpage-10, #countpage-20, #countpage-30, #countpage-50, #countpage-100');
+checkboxes.forEach(el => {
+    el.addEventListener('click', (evt)=> {
+        checkboxes.forEach(e => {
+            e.checked = false;
+            e.removeAttribute('checked');
+        })
+        evt.target.checked = true;
+        evt.target.setAttribute('checked', 'checked');
+    })
+})
 
 function enumElements(el) {
     let attributes = el.attributes;
@@ -32,14 +43,30 @@ function enumElements(el) {
     return '[' + attributeTexts.join('][') + ']';
 }
 
-document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
-    let auth = true;
+let auth = true;
     fetch('/config.json')
         .then(response => response.json())
         .then(data => {
             console.log(data);
             if (data.auth === false) {
-                auth = false;
+                // auth = false;
+                const alert_wrapper = document.querySelector('.alerts');
+                alert_wrapper.insertAdjacentHTML(
+                    "afterbegin",
+                    `<div class="alert alert-warning">
+                        <button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
+                            <i class="tim-icons icon-simple-remove"></i>
+                        </button>
+                        <span>
+                            <b> Bot </b> is not auth.
+                        </span>
+                    </div>
+                `);
+                setTimeout(function() {
+                    window.location.href = '/config';
+                  }, 5000);
+            } else {
+                auth = true;
             }
         });
 
@@ -58,8 +85,9 @@ document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
                     </span>
                 </div>
             `);
-            return;
     }
+
+document.querySelector('.button.small').addEventListener('click', (btn_evt) => {
 
     document.querySelectorAll('input').forEach(el => {
         if (el.getAttribute('type') === 'search' && el.value !== '') {

@@ -91,14 +91,22 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
 
         const cookie = await page.$('label.js-close.c-notifier-btn');
-        await page.evaluate(() => {
-            window.scrollTo(0, document.body.scrollHeight);
-        });
+        // await page.evaluate(() => {
+        //     window.scrollTo(0, document.body.scrollHeight);
+        // });
+        // await page.evaluate(() => {
+        //     window.scrollTo(0, '20px');
+        // });
         if (data.select.length !== 0) {
             for (let select of data.select) {
                 const selectElement = await page.$(select.element);
+                await page.waitForTimeout(1000);
                 await selectElement.focus();
+                await page.waitForTimeout(1000);
+                await page.screenshot({ path: 'screenshot.png', fullPage: true });
+                await page.waitForTimeout(1000);
                 await page.keyboard.press('ArrowDown');
+                await page.waitForTimeout(1000);
                 await selectElement.select(select.value);
             }
         }
@@ -106,17 +114,21 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
         if (data.search.length !== 0) {
             for (let el of data.search) {
                 const label = await page.$(el.label);
+                await page.waitForTimeout(1000);
                 const input = await page.$(el.element);
+                await page.waitForTimeout(1000);
                 await label.click();
+                await page.waitForTimeout(1000);
                 await page.evaluate((e) => e.click(), label);
+                await page.waitForTimeout(1000);
                 await label.focus();
+                await page.waitForTimeout(1000);
                 await input.type(el.value, { delay: 100 });
+                await page.waitForTimeout(1000);
                 const liElement = await input.evaluateHandle((e) => {
                     return e.parentElement.querySelector('ul li')
                 });
-                await page.waitForTimeout(5000);
-
-                await page.waitForTimeout(5000);
+                await page.waitForTimeout(10000);
                 await liElement.click();
             }
         }
@@ -125,6 +137,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
             for (let radio of data.radio) {
                 await page.waitForTimeout(1000);
                 const radioElement = await page.$(radio.label);
+                await page.waitForTimeout(5000);
                 if (radioElement !== null) {
                     await radioElement.click();
                 }
@@ -134,7 +147,7 @@ function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
         await page.screenshot({ path: 'screenshot.png' });
 
         const submit = await page.$('button.button.small');
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(10000);
         await submit.click();
         await page.evaluate((e) => e.click(), submit);
         await page.waitForTimeout(10000);

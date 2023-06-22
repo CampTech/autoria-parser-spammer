@@ -1,11 +1,18 @@
 const { parseSearch } = require('./puppeteer.js');
-const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, logout, getRemote } = require('./emulator/appium.js');
+const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, getRemote } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const express = require('express');
 const app = express();
+
+setInterval(() => {
+    // Ваш код здесь
+  
+    // Вызов функции для сборки мусора
+    gc.collect();
+  }, 10000); // Вызывать с
 
 let isProcessing = false;
 const processing_path = './assets/processing.json';
@@ -185,21 +192,19 @@ app.post('/config/auth', (req, res) => {
             setFileData('./assets/message.json', data.message);
         }
 
+        setFileData('./assets/config.json', {'auth': true});
         res.statusCode = 200;
         res.end(JSON.stringify(true));
     });
 });
 
-app.get('/config/logout', (req, res) => {
-    if (!isProcessing) {
-        isProcessing = true;
-        logout(driver);
-        isProcessing = false;
-        const data = {
-            'auth': false
-        }
-        setFileData('./assets/config.json', data);
+app.get('/config/logout', async (req, res) => {
+    await spawn('docker', ['exec', '--privileged', 'androidContainer', 'adb', 'shell', 'pm', 'clear', 'com.whatsapp']);
+    const data = {
+        'auth': false
     }
+    setFileData('./assets/config.json', data);
+
 });
 
 
