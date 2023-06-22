@@ -1,18 +1,11 @@
 const { parseSearch } = require('./puppeteer.js');
-const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, getRemote } = require('./emulator/appium.js');
+const { runWhatsappSpammer, checkInterestedStatus, auth, authNextStep, checkAuth, getRemote, executeADBCommand } = require('./emulator/appium.js');
 const { getFileData, setFileData } = require('./functions');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const express = require('express');
 const app = express();
-
-setInterval(() => {
-    // Ваш код здесь
-  
-    // Вызов функции для сборки мусора
-    gc.collect();
-  }, 10000); // Вызывать с
 
 let isProcessing = false;
 const processing_path = './assets/processing.json';
@@ -207,6 +200,11 @@ app.get('/config/logout', async (req, res) => {
 
 });
 
+app.get('/screenshot', (req, res) => {
+    executeADBCommand(`exec-out screencap -p > ./assets/screenshotStep.png`);
+    new Promise((resolve) => setTimeout(resolve, 5000));
+    res.render('screenshot');
+});
 
 
 app.listen(3000, () => {

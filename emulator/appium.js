@@ -301,7 +301,7 @@ async function auth(driver, number) {
     await new Promise((resolve) => setTimeout(resolve, 15000));
   }
 
-  async function findElement(element, timeout = 10000) {
+  async function findElement(element, timeout = 60000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -349,7 +349,7 @@ async function authNextStep(driver, bot_name, code) {
   await elClick('resourceId("com.whatsapp:id/register_name_accept")');
 
 
-  async function findElement(element, timeout = 35000) {
+  async function findElement(element, timeout = 60000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -401,5 +401,6 @@ module.exports = {
   auth,
   authNextStep,
   checkAuth,
-  getRemote
+  getRemote,
+  executeADBCommand
 };
