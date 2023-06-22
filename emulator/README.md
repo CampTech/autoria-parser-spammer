@@ -39,9 +39,8 @@ Down below is the list of the main scripts to launch the relevant service, certa
 
         docker exec --privileged -it androidContainer bash -c "appium -p 5900"
 
-     OR
+4. Removed node modules in docker container
 
-        docker exec --privileged  -it androidContainer bash -c "./start_appium.sh"
 
  
 4.  **Start the emulator in headless mode :**

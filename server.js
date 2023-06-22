@@ -149,19 +149,41 @@ app.post('/processing/add', (req, res) => {
 app.get('/config', async (req, res) => {
     res.render('config');
 
-    if (!isProcessing) {
-        isProcessing = true;
-        const check = await checkAuth(driver);
-        isProcessing = false;
+    // if (!isProcessing) {
+    //     isProcessing = true;
+    //     const check = await checkAuth(driver);
+    //     isProcessing = false;
 
-        const data = {
-            'auth': check
-        }
+    //     const data = {
+    //         'auth': check
+    //     }
 
-        setFileData('./assets/config.json', data);
+    //     setFileData('./assets/config.json', data);
+    // }
+
+});
+
+app.get('/config/auth/qr', async (req, res) => {
+    const authQrCode = await auth(driver);
+
+    if (await authQrCode) {
+        res.statusCode = 200;
+        res.end(JSON.stringify(true));
+        setFileData('./assets/config.json', { 'auth': true });
+    } else {
+        res.statusCode = 500;
+        res.end(JSON.stringify(false));
+        setFileData('./assets/config.json', { 'auth': false });
     }
 
 });
+
+// app.get('/config/check', async (req, res) => {
+//     const check = await checkAuth(driver);
+
+//     res.statusCode = 200;
+//     res.end(JSON.stringify(check));
+// })
 
 app.post('/config/auth', (req, res) => {
     let json = '';
@@ -173,19 +195,22 @@ app.post('/config/auth', (req, res) => {
     req.on('end', () => {
         const data = JSON.parse(json);
 
-        console.log(data);
-        if (data.message === null) {
-            if (data.code === null) {
-                auth(driver, data.number);
-            } else {
-                authNextStep(driver, data.bot_name, data.code);
-            }
-        } else {
-            message = data.message;
-            setFileData('./assets/message.json', data.message);
-        }
 
-        setFileData('./assets/config.json', {'auth': true});
+
+
+        // console.log(data);
+        // if (data.message === null) {
+        //     if (data.code === null) {
+        //         auth(driver, data.number);
+        //     } else {
+        //         authNextStep(driver, data.bot_name, data.code);
+        //     }
+        // } else {
+        //     message = data.message;
+        //     setFileData('./assets/message.json', data.message);
+        // }
+
+        setFileData('./assets/config.json', { 'auth': true });
         res.statusCode = 200;
         res.end(JSON.stringify(true));
     });
@@ -199,6 +224,21 @@ app.get('/config/logout', async (req, res) => {
     setFileData('./assets/config.json', data);
 
 });
+
+app.post('/config/message', (req, res) => {
+    let json = '';
+    req.on('data', (chunk) => {
+        json += chunk;
+    });
+
+    req.on('end', () => {
+        const data = JSON.parse(json);
+        message = data.message;
+        setFileData('./assets/message.json', data.message);
+        res.statusCode = 200;
+        res.end(JSON.stringify(true));
+    })
+})
 
 app.get('/screenshot', (req, res) => {
     executeADBCommand(`exec-out screencap -p > ./assets/screenshotStep.png`);

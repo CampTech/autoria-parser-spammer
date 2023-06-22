@@ -23,42 +23,103 @@ async function getRemote() {
     }
   });
   try {
-    const wait = await driver.$('android=new UiSelector().text("Wait")');
-    await wait.click();
-    executeADBCommand(`exec-out screencap -p > screenshot.png`);
+    // const wait = await driver.$('android=new UiSelector().text("Wait")');
+    // await wait.click();
+    // await elClick('text("Send message")');
+    // await elClick('resourceId("com.whatsapp:id/menuitem_search")');
+    // await elClick('resourceId("com.whatsapp:id/search_src_text")');
+    // console.log(await driver.getPageSource());
+    // await elSetValue('resourceId("com.whatsapp:id/search_src_text")', '380635201674');
+    // await elClick('resourceId("com.whatsapp:id/contactpicker_text_container")');
+    // await elSetValue('resourceId("com.whatsapp:id/entry")', 'Hi');
+    // await elClick('resourceId("com.whatsapp:id/send")');
+    // await elClick('resourceId("com.whatsapp:id/back")');
+    // await driver.back();
+    console.log('Initialized');
+
+
   } catch { }
 
   return driver;
+
+  async function elSetValue(el, value) {
+    try {
+      const element = await findElement(el);
+      if (element !== null) {
+        await element.setValue(value);
+      }
+    } catch (err) {
+      console.log(`element ${el} undefined` + '' + err);
+    }
+  }
+
+  async function findElement(element, timeout = 6000) {
+    try {
+      const selector = `android=new UiSelector().${element}`;
+      await driver.$(selector).waitForDisplayed({ timeout: timeout });
+      return await driver.$(selector);
+    } catch { return null; }
+  }
+
+  async function elClick(el) {
+    try {
+      const element = await findElement(el);
+      if (element !== null) {
+        await element.click();
+      }
+    } catch (err) {
+      console.log(`element ${el} undefined` + '' + err);
+    }
+  }
 }
 
 async function runWhatsappSpammer(driver, clients_list, message) {
   let index = 0;
-  // await reloadApp();
+  await reloadApp();
   // if (findElement('text("Send message")')) {
-  //   await elClick('text("Send message")');
-  //   await addNewClient('SCFW', 'Maker', '0635201674');
+  //   if (!findElement('text("SCFW")')) {
+  //     await elClick('text("Send message")');
+  //     await addNewClient('SCFW', 'Maker', '0688400671');
+  //   }
   // }
 
   for (const client_list of clients_list) {
+    const decline_clients = [];
     for (const client of client_list.clients) {
       index++;
-      await reloadApp();
+      // await reloadApp();
       const number = client.number;
       let client_phone = number.replace(/[()]/g, "");
-      // client_phone = '0635201674';
+      client_phone = '0688400671';
       if (await sendMessage('38' + client_phone, message)) {
-        client_list.status = 'complete';
-        client_list.messanger = 'whatsapp';
-        client_list.message_to = message;
+        client.status = 'complete';
+        client.messanger = 'whatsapp';
+        client.message_to = message;
       } else {
-        client_list.messanger = 'none';
+        client.messanger = 'none';
+        decline_clients.push(client);
       }
-      executeADBCommand(`exec-out screencap -p > screenshotStep${index}.png`);
+      if (await findElement('resourceId("com.whatsapp:id/back")')) {
+        await elClick('resourceId("com.whatsapp:id/back")');
+      } else {
+        await reloadApp();
+      }
+      // executeADBCommand(`exec-out screencap -p > screenshotStep${index}.png`);
     }
 
     getFileData('./assets/clients.json', (json) => {
       const data = JSON.parse(json);
       const client = data.find(filter => filter.filter_id === client_list.filter_id);
+
+      for (const client_data of client.clients) {
+        for (const decline_client of decline_clients) {
+          if (!decline_client.id === client_data.id) {
+            client_data.status = 'complete';
+            client_data.messanger = 'whatsapp';
+            client_data.message_to = message;
+          }
+        }
+      }
 
       client.status = 'complete';
       console.log(data);
@@ -149,7 +210,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
     if (await findElement('resourceId("com.whatsapp:id/fab")')) {
       await elClick('resourceId("com.whatsapp:id/fab")');
     } else {
-      await findElement('text("Send message")');
+      await elClick('text("Send message")');
     }
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -192,7 +253,7 @@ async function checkInterestedStatus(driver) {
       await check();
     } else {
       console.log(false);
-      await driver.closeApp();
+      // await driver.closeApp();
     }
   }
 
@@ -243,13 +304,13 @@ async function checkAuth(driver) {
   driver.closeApp();
   driver.launchApp();
 
-  await elClick('resourceId("com.whatsapp:id/next_button")');
+  // await elClick('resourceId("com.whatsapp:id/next_button")');
   if (await findElement('resourceId("com.whatsapp:id/eula_accept")')) {
     return false;
   }
   return true;
 
-  async function findElement(element, timeout = 36000) {
+  async function findElement(element, timeout = 6000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -273,35 +334,58 @@ async function auth(driver, number) {
   await driver.closeApp();
   await driver.launchApp();
 
-
-  const registration_phone = number.replace(/^\+380/, "");
-  //Step 1:
+  await elClick('text("CONTINUE")')
   await elClick('resourceId("com.whatsapp:id/next_button")');
-  await new Promise((resolve) => setTimeout(resolve, 25000));
+
+
+  // const registration_phone = number.replace(/^\+380/, "");
+  //Step 1:
+
+  // await new Promise((resolve) => setTimeout(resolve, 25000));
 
   if (await findElement('resourceId("com.whatsapp:id/eula_accept")')) {
-    // //Step2:
     await elClick('resourceId("com.whatsapp:id/eula_accept")');
+    await elClick('resourceId("com.whatsapp:id/menuitem_overflow")');
+    await elClick('text("Link to existing account")');
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await executeADBCommand(`exec-out screencap -p > ./assets/qr.png`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // //Step3:
-    await elClick('text("United States")');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await elClick('resourceId("com.whatsapp:id/menuitem_search")');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await elSetValue('resourceId("com.whatsapp:id/search_src_text")', 'Ukraine');
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await elClick('resourceId("com.whatsapp:id/country_first_name")');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await elSetValue('resourceId("com.whatsapp:id/registration_phone")', registration_phone);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await elClick('resourceId("com.whatsapp:id/registration_submit")');
-    await new Promise((resolve) => setTimeout(resolve, 20000));
-    await elClick('resourceId("android:id/button1")');
-    await new Promise((resolve) => setTimeout(resolve, 15000));
+    return true;
+
+
+
+
+
+
+    // //Step2:
+    // await elClick('resourceId("com.whatsapp:id/eula_accept")');
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    // // //Step3:
+    // await elClick('text("United States")');
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await elClick('resourceId("com.whatsapp:id/menuitem_search")');
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await elSetValue('resourceId("com.whatsapp:id/search_src_text")', 'Ukraine');
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
+    // await elClick('resourceId("com.whatsapp:id/country_first_name")');
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await elSetValue('resourceId("com.whatsapp:id/registration_phone")', registration_phone);
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await elClick('resourceId("com.whatsapp:id/registration_submit")');
+    // await new Promise((resolve) => setTimeout(resolve, 20000));
+    // await elClick('resourceId("android:id/button1")');
+    // await new Promise((resolve) => setTimeout(resolve, 15000));
+    // if (await findElement('text("OK")')) {
+    //   await elClick('text("OK")');
+
+    // }
   }
+  return false;
 
-  async function findElement(element, timeout = 60000) {
+  async function findElement(element, timeout = 6000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });
@@ -389,8 +473,6 @@ function executeADBCommand(command) {
     throw error;
   }
 }
-
-executeADBCommand(`exec-out screencap -p > screenshotStep.png`);
 
 //docker exec -it --privileged androidContainer emulator @nexus -no-window -no-snapshot -noaudio -no-boot-anim -memory 648 -accel on -gpu swiftshader_indirect -camera-back none -cores 4
 //docker exec --privileged -it androidContainer bash -c "appium -p 5900"

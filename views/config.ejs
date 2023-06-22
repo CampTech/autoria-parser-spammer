@@ -109,7 +109,8 @@
           <div class="col-md-10">
             <div class="card p-4">
               <div class="card-header">
-                <h5 class="title">Auth whatsapp</h5>
+                <h5 class="title">Auth whatsapp <a id="edit_message" style="margin-left: 10px;" href="#">Edit
+                    message</a></h5>
               </div>
               <div class="card-body">
                 <form>
@@ -121,7 +122,7 @@
                     </div>
                   </div>
 
-                  <div class="row" id="index1">
+                  <div class="row d-none" id="index1">
                     <div class="col-md px-md-1">
                       <div class="form-group">
                         <label>Bot name</label>
@@ -154,9 +155,22 @@
                         <label>Message</label>
                         <textarea id="message" rows="4" cols="80" class="form-control" placeholder="Message"
                           value=""></textarea>
+                        <button id="message_btn" type="button" class="btn btn-fill btn-primary">Save</button>
                       </div>
                     </div>
                   </div>
+
+
+                  <div class="row d-none" id="qr_preview">
+                    <div class="col-md px-md-1">
+                      <div class="form-group">
+                        <h2>Moment please...</h2>
+
+                      </div>
+                    </div>
+                  </div>
+
+
 
                 </form>
               </div>
@@ -297,10 +311,35 @@
   <script>
     let step = 0;
 
+    const btn = document.querySelector('#btn');
     const index0 = document.querySelector('#index0');
     const index1 = document.querySelector('#index1');
     const index2 = document.querySelector('#index2');
     const index3 = document.querySelector('#index3');
+    const qr_preview = document.querySelector('#qr_preview');
+    const edit_message = document.querySelector('#edit_message');
+    const message_field = document.querySelector('#message');
+
+    edit_message.addEventListener('click', () => {
+      index0.classList.add('d-none');
+      index3.classList.remove('d-none');
+      btn.classList.add('d-none');
+
+      document.querySelector('#message_btn').addEventListener('click', () => {
+        const message = {
+          'message': message_field.value
+        };
+
+        fetch('/config/message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message)
+        }).then(response => response.json())
+        window.location.href = '/';
+      })
+    })
 
 
     fetch('/config.json')
@@ -308,67 +347,109 @@
       .then(data => {
         if (data.auth) {
           index0.classList.remove('d-none');
-          index1.classList.add('d-none');
           document.querySelector('#btn').innerText = 'Logout';
           step = -1;
+        } else {
+          index0.classList.add('d-none');
+          qr_preview.classList.remove('d-none');
+          document.querySelector('#btn').classList.add('d-none');
+          message_field.classList.add('d-none');
+
+          fetch('/config/auth/qr')
+            .then(response => response.json())
+            .then(auth => {
+
+              if (auth === true) {
+                qr_preview.innerHTML = `
+                <img src="/qr.png">
+              `
+              } else {
+                qr_preview.innerText = 'Error auth'
+              }
+            });
         }
       });
 
-
     document.querySelector('#btn').addEventListener('click', () => {
       step++;
+
+      if (step === -1) {
+        document.querySelector('#btn').classList.remove('d-none');
+        index0.classList.remove('d-none');
+        qr_preview.classList.add('d-none');
+      }
+
+
       if (step === 0) {
         fetch('/config/logout', {
           method: 'GET'
         });
-        document.querySelector('#btn').innerText = 'Next';
+        document.querySelector('#btn').classList.add('d-none');
         index0.classList.add('d-none');
-        index1.classList.remove('d-none');
         index2.classList.add('d-none');
-      }
-      if (step === 1) {
-        index1.classList.add('d-none');
-        index2.classList.remove('d-none');
-        document.querySelector('#btn').setAttribute('disabled', 'disabled');
-        document.querySelector('#code').addEventListener('input', () => {
-          document.querySelector('#btn').removeAttribute('disabled');
-        });
-      }
 
-      if (step === 2) {
-        index2.classList.add('d-none');
-        index3.classList.remove('d-none');
-      }
+        qr_preview.classList.remove('d-none');
 
-      if (step === 3) {
-        index2.classList.add('d-none');
-        index0.classList.remove('d-none');
-        index3.classList.add('d-none');
-        document.querySelector('#btn').innerText = 'Logout';
+
+        fetch('/config/auth/qr')
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+
+            if (data === true) {
+              qr_preview.innerHTML = `
+                <img src="/qr.png">
+              `
+            } else {
+              qr_preview.innerText = 'Error auth'
+            }
+          });
       }
 
-      const botName = document.querySelector('#bot_name').value;
-      const number = document.querySelector('#number').value;
-      const code = document.querySelector('#code').value;
-      const message = document.querySelector('#message').value;
 
-      const data = {
-        'bot_name': botName !== '' ? botName : null,
-        'number': number !== '' ? number : null,
-        'code': code !== '' ? code : null,
-        'message': message !== '' ? message : null
-      }
+      //   if (step === 1) {
+      //     index1.classList.add('d-none');
+      //     index2.classList.remove('d-none');
+      //     document.querySelector('#btn').setAttribute('disabled', 'disabled');
+      //     document.querySelector('#code').addEventListener('input', () => {
+      //       document.querySelector('#btn').removeAttribute('disabled');
+      //     });
+      //   }
 
-      fetch('/config/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }).then(response => response.json())
-        .then(responseData => {
-          console.log(responseData);
-        })
+      //   if (step === 2) {
+      //     index2.classList.add('d-none');
+      //     index3.classList.remove('d-none');
+      //   }
+
+      //   if (step === 3) {
+      //     index2.classList.add('d-none');
+      //     index0.classList.remove('d-none');
+      //     index3.classList.add('d-none');
+      //     document.querySelector('#btn').innerText = 'Logout';
+      //   }
+
+      //   const botName = document.querySelector('#bot_name').value;
+      //   const number = document.querySelector('#number').value;
+      //   const code = document.querySelector('#code').value;
+      //   const message = document.querySelector('#message').value;
+
+      //   const data = {
+      //     'bot_name': botName !== '' ? botName : null,
+      //     'number': number !== '' ? number : null,
+      //     'code': code !== '' ? code : null,
+      //     'message': message !== '' ? message : null
+      //   }
+
+      //   fetch('/config/auth', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json'
+      //     },
+      //     body: JSON.stringify(data)
+      //   }).then(response => response.json())
+      //     .then(responseData => {
+      //       console.log(responseData);
+      //     })
     });
 
   </script>
