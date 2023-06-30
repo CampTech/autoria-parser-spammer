@@ -25,52 +25,12 @@ async function getRemote() {
   try {
     // const wait = await driver.$('android=new UiSelector().text("Wait")');
     // await wait.click();
-    // await elClick('text("Send message")');
-    // await elClick('resourceId("com.whatsapp:id/menuitem_search")');
-    // await elClick('resourceId("com.whatsapp:id/search_src_text")');
-    // console.log(await driver.getPageSource());
-    // await elSetValue('resourceId("com.whatsapp:id/search_src_text")', '380635201674');
-    // await elClick('resourceId("com.whatsapp:id/contactpicker_text_container")');
-    // await elSetValue('resourceId("com.whatsapp:id/entry")', 'Hi');
-    // await elClick('resourceId("com.whatsapp:id/send")');
-    // await elClick('resourceId("com.whatsapp:id/back")');
-    // await driver.back();
     console.log('Initialized');
 
 
   } catch { }
 
   return driver;
-
-  async function elSetValue(el, value) {
-    try {
-      const element = await findElement(el);
-      if (element !== null) {
-        await element.setValue(value);
-      }
-    } catch (err) {
-      console.log(`element ${el} undefined` + '' + err);
-    }
-  }
-
-  async function findElement(element, timeout = 6000) {
-    try {
-      const selector = `android=new UiSelector().${element}`;
-      await driver.$(selector).waitForDisplayed({ timeout: timeout });
-      return await driver.$(selector);
-    } catch { return null; }
-  }
-
-  async function elClick(el) {
-    try {
-      const element = await findElement(el);
-      if (element !== null) {
-        await element.click();
-      }
-    } catch (err) {
-      console.log(`element ${el} undefined` + '' + err);
-    }
-  }
 }
 
 async function runWhatsappSpammer(driver, clients_list, message) {
@@ -85,18 +45,21 @@ async function runWhatsappSpammer(driver, clients_list, message) {
 
   for (const client_list of clients_list) {
     const decline_clients = [];
+    console.log(clients_list);
+    console.log(client_list);
     for (const client of client_list.clients) {
       index++;
       // await reloadApp();
       const number = client.number;
       let client_phone = number.replace(/[()]/g, "");
       client_phone = '0688400671';
-      if (await sendMessage('38' + client_phone, message)) {
-        client.status = 'complete';
-        client.messanger = 'whatsapp';
-        client.message_to = message;
+      client_phone = '38' + client_phone;
+      if (await sendMessage(client_phone, message)) {
+        // client.status = 'complete';
+        // client.messanger = 'whatsapp';
+        // client.message_to = message;
       } else {
-        client.messanger = 'none';
+        // client.messanger = 'none';
         decline_clients.push(client);
       }
       if (await findElement('resourceId("com.whatsapp:id/back")')) {
@@ -104,7 +67,6 @@ async function runWhatsappSpammer(driver, clients_list, message) {
       } else {
         await reloadApp();
       }
-      // executeADBCommand(`exec-out screencap -p > screenshotStep${index}.png`);
     }
 
     getFileData('./assets/clients.json', (json) => {
@@ -117,6 +79,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
             client_data.status = 'complete';
             client_data.messanger = 'whatsapp';
             client_data.message_to = message;
+            delete client_data;
           }
         }
       }
@@ -169,6 +132,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
   async function reloadApp() {
     await driver.closeApp();
     await driver.launchApp();
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   async function addNewClient(client_name, client_last_name, client_phone) {
@@ -332,6 +296,7 @@ async function checkAuth(driver) {
 
 async function auth(driver, number) {
   await driver.closeApp();
+  await new Promise((resolve) => setTimeout(resolve, 10000));
   await driver.launchApp();
 
   await elClick('text("CONTINUE")')
@@ -348,7 +313,7 @@ async function auth(driver, number) {
     await elClick('resourceId("com.whatsapp:id/menuitem_overflow")');
     await elClick('text("Link to existing account")');
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     await executeADBCommand(`exec-out screencap -p > ./assets/qr.png`);
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -385,7 +350,7 @@ async function auth(driver, number) {
   }
   return false;
 
-  async function findElement(element, timeout = 6000) {
+  async function findElement(element, timeout = 60000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });

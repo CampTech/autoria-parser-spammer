@@ -37,24 +37,24 @@ app.get('/', (req, res) => {
 app.get('/clients', async (req, res) => {
     res.render('clients');
 
-    const interested = await checkInterestedStatus(driver);
+    // const interested = await checkInterestedStatus(driver);
 
-    if (interested) {
-        getFileData('./assets/clients.json', (json) => {
-            const data = JSON.parse(json);
+    // if (interested) {
+    //     getFileData('./assets/clients.json', (json) => {
+    //         const data = JSON.parse(json);
 
-            for (const interes of interested) {
-                data.forEach(el => {
-                    const number = el.clients.find(filter => filter.number === interes.number);
-                    if (number) {
-                        number.interested = 'Yes';
-                        number.message_from = interes.message;
-                    }
-                });
-            }
-            setFileData('./assets/clients.json', data);
-        });
-    }
+    //         for (const interes of interested) {
+    //             data.forEach(el => {
+    //                 const number = el.clients.find(filter => filter.number === interes.number);
+    //                 if (number) {
+    //                     number.interested = 'Yes';
+    //                     number.message_from = interes.message;
+    //                 }
+    //             });
+    //         }
+    //         setFileData('./assets/clients.json', data);
+    //     });
+    // }
 });
 
 app.get('/client/:id', async (req, res) => {
@@ -86,35 +86,53 @@ app.post('/processing/add', (req, res) => {
 
     req.on('end', () => {
         let jsonData = JSON.parse(data);
-        getFileData(processing_path, (processing_data) => {
-            if (processing_data) {
-                processing_data = JSON.parse(processing_data);
-                const id = processing_data[processing_data.length - 1].id;
-                jsonData.id = id + 1;
-                jsonData.status = 'parsing'
-                processing_data.push(jsonData);
-                setFileData(processing_path, processing_data);
-            } else {
-                arr = [];
-                arr.push({
-                    ...JSON.parse(data),
-                    id: 1,
-                    status: 'parsing'
-                });
-                setFileData(processing_path, arr);
-            }
+        waitProcess();
+        function waitProcess() {
+            getFileData(processing_path, (processing_data) => {
+                if (processing_data) {
+                    processing_data = JSON.parse(processing_data);
+                    const foundedProccessing = processing_data.some(obj => {
+                        const objCopy = { ...obj };
+                        delete objCopy.id;
+                        delete objCopy.status;
+                        delete jsonData.id;
+                        delete jsonData.status;
+                        return JSON.stringify(objCopy) == JSON.stringify(jsonData);
+                    });
+                    console.log(foundedProccessing);
+                    if (!foundedProccessing) {
+                        const id = processing_data[processing_data.length - 1].id;
+                        jsonData.id = id + 1;
+                        jsonData.status = 'parsing';
+                        processing_data.push(jsonData);
+                        setFileData(processing_path, processing_data);
+                    }
+                } else {
+                    arr = [];
+                    arr.push({
+                        ...JSON.parse(data),
+                        id: 1,
+                        status: 'parsing'
+                    });
+                    setFileData(processing_path, arr);
+                }
 
-            if (!isProcessing) {
-                isProcessing = true;
-                processQueue();
-            }
-        });
+                if (!isProcessing) {
+                    isProcessing = true;
+                    processQueue();
+                } else {
+                    setTimeout(function () {
+                        waitProcess();
+                    }, 20000);
+                }
+            });
+        }
 
         res.statusCode = 200;
         res.end(JSON.stringify(true));
 
-        function processQueue() {
-            getFileData(processing_path, async (json) => {
+        async function processQueue() {
+            await getFileData(processing_path, async (json) => {
                 if (json.indexOf('parsing') !== -1) {
                     const data = JSON.parse(json);
 
@@ -122,28 +140,30 @@ app.post('/processing/add', (req, res) => {
                         if (el.status == 'parsing') {
                             try {
                                 await parseSearch(el);
-                                const index = data.indexOf(el);
-                                data[index].status = 'sending';
-                                setFileData(processing_path, data);
+                                el.status = 'sending'
                             } catch (error) {
                                 console.error('Ошибка при выполнении запроса:', error);
                             }
                         }
                     }
-                    processQueue();
+                    setFileData(processing_path, data);
+                    isProcessing = false;
+                    await processQueue();
                 } else {
                     getFileData('./assets/clients.json', async (json) => {
                         const data = JSON.parse(json);
                         const filteredData = data.filter(process => process.status === 'sending');
-                        isProcessing = true;
-                        await runWhatsappSpammer(driver, filteredData, message);
-                        isProcessing = false;
+                        if (!isProcessing) {
+                            isProcessing = true;
+                            await runWhatsappSpammer(driver, filteredData, message);
+                            isProcessing = false;
+                        }
                     });
+                    await processQueue();
                 }
             });
         }
     })
-
 });
 
 app.get('/config', async (req, res) => {
@@ -249,7 +269,7 @@ app.get('/screenshot', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Сервер запущений');
-    // runEmulator();
+    runEmulator();
 });
 
 
@@ -259,7 +279,7 @@ function runEmulator() {
     const emulatorArgs = ['exec', '--privileged', 'androidContainer', 'emulator', '@nexus', '-no-window', '-no-snapshot', '-noaudio', '-no-boot-anim', '-memory', '648', '-accel', 'on', '-gpu', 'swiftshader_indirect', '-camera-back', 'none', '-cores', '4'];
     const emulatorProcess = spawn(docker, emulatorArgs, { stdio: 'inherit' });
     new Promise((resolve) => setTimeout(resolve, 5000));
-    // const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
+    const appiumProcess = spawn(docker, ['exec', '--privileged', 'androidContainer', 'bash', '-c', 'appium -p 5900'])
     new Promise((resolve) => setTimeout(resolve, 5000));
 
     emulatorProcess.on('exit', async (code) => {

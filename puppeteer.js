@@ -84,7 +84,7 @@ async function parseAutoRia(urls, browser, filterId) {
 }
 
 
-function parseSearch(data, url = "https://auto.ria.com/uk/advanced-search/") {
+function parseSearch(data = [], url = "https://auto.ria.com/uk/advanced-search/") {
     return new Promise(async (resolve, reject) => {
         const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
