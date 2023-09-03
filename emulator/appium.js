@@ -1,3 +1,4 @@
+
 const { remote } = require('webdriverio');
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -23,11 +24,8 @@ async function getRemote() {
     }
   });
   try {
-    // const wait = await driver.$('android=new UiSelector().text("Wait")');
-    // await wait.click();
+    await driver.launchApp();
     console.log('Initialized');
-
-
   } catch { }
 
   return driver;
@@ -35,7 +33,7 @@ async function getRemote() {
 
 async function runWhatsappSpammer(driver, clients_list, message) {
   let index = 0;
-  await reloadApp();
+  //await reloadApp();
   // if (findElement('text("Send message")')) {
   //   if (!findElement('text("SCFW")')) {
   //     await elClick('text("Send message")');
@@ -45,26 +43,16 @@ async function runWhatsappSpammer(driver, clients_list, message) {
 
   for (const client_list of clients_list) {
     const decline_clients = [];
-    console.log(clients_list);
-    console.log(client_list);
     for (const client of client_list.clients) {
       index++;
-      // await reloadApp();
       const number = client.number;
       let client_phone = number.replace(/[()]/g, "");
-      client_phone = '0688400671';
+      //client_phone = '380688400671';
       client_phone = '38' + client_phone;
       if (await sendMessage(client_phone, message)) {
-        // client.status = 'complete';
-        // client.messanger = 'whatsapp';
-        // client.message_to = message;
+        await driver.back();
       } else {
-        // client.messanger = 'none';
         decline_clients.push(client);
-      }
-      if (await findElement('resourceId("com.whatsapp:id/back")')) {
-        await elClick('resourceId("com.whatsapp:id/back")');
-      } else {
         await reloadApp();
       }
     }
@@ -93,7 +81,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
       const data = JSON.parse(json);
 
       const client = data.find(filter => filter.id === client_list.filter_id);
-      client.status = 'complete';
+      //client.status = 'complete';
       console.log(data);
       setFileData('./assets/processing.json', data);
     });
@@ -176,7 +164,6 @@ async function runWhatsappSpammer(driver, clients_list, message) {
     } else {
       await elClick('text("Send message")');
     }
-    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     await elClick('resourceId("com.whatsapp:id/menuitem_search")');
     await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -206,7 +193,7 @@ async function runWhatsappSpammer(driver, clients_list, message) {
   //get All Xml on the page
   // console.log(await driver.getPageSource());
 
-  await screenshot();
+  //await screenshot();
 }
 
 async function checkInterestedStatus(driver) {
@@ -296,12 +283,10 @@ async function checkAuth(driver) {
 
 async function auth(driver, number) {
   await driver.closeApp();
-  await new Promise((resolve) => setTimeout(resolve, 10000));
   await driver.launchApp();
-
-  await elClick('text("CONTINUE")')
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await elClick('text("CONTINUE")');
   await elClick('resourceId("com.whatsapp:id/next_button")');
-
 
   // const registration_phone = number.replace(/^\+380/, "");
   //Step 1:
@@ -350,7 +335,7 @@ async function auth(driver, number) {
   }
   return false;
 
-  async function findElement(element, timeout = 60000) {
+  async function findElement(element, timeout = 20000) {
     try {
       const selector = `android=new UiSelector().${element}`;
       await driver.$(selector).waitForDisplayed({ timeout: timeout });

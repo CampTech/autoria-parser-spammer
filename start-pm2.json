@@ -1,0 +1,47 @@
+[
+  {
+    "name": "android-emulator",
+    "script": "docker",
+    "args": [
+      "exec",
+      "-it",
+      "--privileged",
+      "androidContainer",
+      "emulator",
+      "@nexus",
+      "-no-window",
+      "-no-snapshot",
+      "-noaudio",
+      "-no-boot-anim",
+      "-memory",
+      "2048",
+      "-accel",
+      "on",
+      "-gpu",
+      "swiftshader_indirect",
+      "-camera-back",
+      "none",
+      "-cores",
+      "4"
+    ]
+  },
+  {
+    "name": "appium-server",
+    "script": "docker",
+    "args": [
+      "exec",
+      "-it",
+      "--privileged",
+      "androidContainer",
+      "bash",
+      "-c",
+      "appium -p 5900"
+    ]
+  },
+  {
+    "name": "node-server",
+    "script": "server.js",
+    "cwd": ".",
+    "interpreter": "node"
+  }
+]
