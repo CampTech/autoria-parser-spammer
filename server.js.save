@@ -71,8 +71,8 @@ app.get('/client/:id', async (req, res) => {
 app.get('/clients/delete', async (req, res) => {
     getFileData('./assets/clients.json', async (json) => {
        const data = JSON.parse(json);
-       for (el of data) { if (el.status == 'complete') { delete el; } }
-       console.log(data);
+       const complete_clients = data.map(el => { if (el.status == 'complete') {  } });
+       console.log(complete_clients);
     });
 });
 
